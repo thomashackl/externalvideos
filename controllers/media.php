@@ -90,6 +90,10 @@ class MediaController extends AuthenticatedController {
 
         $medium->chdate = date('Y-m-d H:i:s');
 
+        if (($url = ExternalMediaFile::extractVideoSources(Request::get('url'))) != null) {
+            $medium->mediumurl = $url;
+        }
+
         if ($medium->store()) {
             PageLayout::postSuccess(
                 dgettext('mediacontent','Das Medium wurde erfolgreich hinzugefügt.'));

@@ -41,4 +41,46 @@ class ExternalMediaFile extends SimpleORMap
         parent::configure($config);
     }
 
+    public static function extractVideoSources($url)
+    {
+
+        // OneDrive Business
+        if (mb_strpos($url, 'my.sharepoint.com') !== false) {
+
+            require_once(__DIR__ . '/../vendor/autoload.php');
+
+            try {
+                $puppeteer = new Nesk\Puphpeteer\Puppeteer;
+
+                $browser = $puppeteer->launch(['executablePath' => Config::get()->MEDIACONTENT_CHROME_PATH]);
+
+                $page = $browser->newPage();
+                $page->goto($url);
+                $page->waitForSelector('video', ['timeout' => 5000]);
+                $pageUrl = $page->url();
+                $content = $page->content();
+
+                $matches = [];
+                preg_match('/<video.*src="(.*)".*<\/video>/', $page->content(), $matches);
+
+                /*$start = mb_strpos($pageUrl, 'id=') + 3;
+                $end = mb_strpos($pageUrl, '&', $start);
+
+                $domain = mb_substr($pageUrl, 0, mb_strpos($pageUrl, '/', 8));*/
+
+                //return $domain . urldecode(mb_substr($pageUrl, $start, ($end - $start)));
+
+                $browser->close();
+
+                return $matches[1];
+
+            } catch (Exception $e) {
+                return null;
+            }
+
+        } else {
+            return null;
+        }
+    }
+
 }

@@ -27,6 +27,7 @@ class Setup extends Migration {
         (
             `file_id` INT NOT NULL AUTO_INCREMENT,
             `sharelink` VARCHAR(2048) NOT NULL,
+            `mediumurl` VARCHAR(2048) NULL,
             `title` VARCHAR(255) NOT NULL,
             `position` INT NOT NULL DEFAULT 0,
             `course_id` VARCHAR(32) NOT NULL REFERENCES `seminare`.`Seminar_id`,
