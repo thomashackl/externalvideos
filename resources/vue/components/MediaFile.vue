@@ -7,7 +7,7 @@
                     (sichtbar ab {{ medium.visible_from }})
                 </template>
                 <template v-if="medium.visible_from == null && medium.visible_until != null">
-                    (sichtbar bis {{ medium.visible_from }})
+                    (sichtbar bis {{ medium.visible_until }})
                 </template>
                 <template v-if="medium.visible_from != null && medium.visible_until != null">
                     (sichtbar von {{ medium.visible_from }} bis {{ medium.visible_until }})
