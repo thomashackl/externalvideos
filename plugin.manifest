@@ -1,7 +1,7 @@
 pluginname=Medieninhalte
 pluginclassname=MediaContentPlugin
 origin=upa
-version=0.1
+version=1.0
 description=Media content like external videos or podcasts
-studipMinVersion=4.2
+studipMinVersion=4.4.99
 studipMaxVersion=4.9.99

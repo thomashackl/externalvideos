@@ -40,7 +40,7 @@ class MediaController extends AuthenticatedController {
     public function index_action()
     {
         // Navigation handling.
-        Navigation::activateItem('/course/mediacontent');
+        Navigation::activateItem('/course/mediacontent/media');
 
         PageLayout::setTitle(Context::getHeaderLine() . ' - ' . dgettext('mediacontent', 'Medien'));
         PageLayout::addScript($this->plugin->getPluginURL() . '/assets/javascripts/mediacontent.js');
@@ -64,7 +64,13 @@ class MediaController extends AuthenticatedController {
                     ];
                 }
 
-                $this->assigned_dates[$date->date_id]['media'][] = $medium->toArray();
+                $this->assigned_dates[$date->date_id]['media'][] = [
+                    'id' => $medium->id,
+                    'url' => $medium->url,
+                    'title' => $medium->title,
+                    'visible_from' => $medium->visible_from != null ? $medium->visible_from->format('d.m.Y H:i') : null,
+                    'visible_until' => $medium->visible_until != null ? $medium->visible_until->format('d.m.Y H:i') : null
+                ];
 
             } else {
 
@@ -76,7 +82,13 @@ class MediaController extends AuthenticatedController {
                     ];
                 }
 
-                $this->assigned_dates['']['media'][] = $medium->toArray();
+                $this->assigned_dates[$date->date_id]['media'][] = [
+                    'id' => $medium->id,
+                    'url' => $medium->url,
+                    'title' => $medium->title,
+                    'visible_from' => $medium->visible_from != null ? $medium->visible_from->format('d.m.Y H:i') : null,
+                    'visible_until' => $medium->visible_until != null ? $medium->visible_until->format('d.m.Y H:i') : null
+                ];
 
             }
         }
@@ -86,7 +98,7 @@ class MediaController extends AuthenticatedController {
         if ($GLOBALS['perm']->have_studip_perm('dozent', $this->course->id)) {
             $sidebar = Sidebar::get();
             $actions = new ActionsWidget();
-            $actions->addLink(dgettext('mediacontent', 'Audio/Video hinzufügen'),
+            $actions->addLink(dgettext('mediacontent', 'Audio/Video über Link hinzufügen'),
                 $this->link_for('media/edit'),
                 Icon::create('add'))->asDialog('size="auto"');
             $sidebar->addWidget($actions);

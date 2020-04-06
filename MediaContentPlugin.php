@@ -1,9 +1,8 @@
 <?php
 /**
- * WhakamaherePlugin.class.php
+ * MediaContentPlugin.class.php
  *
- * Plugin for semester room and time planning of courses.
- * Kudos to the Maori people for having such an awesome culture.
+ * Plugin for embedding video shares from external clouds.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -12,10 +11,10 @@
  *
  * @author      Thomas Hackl <thomas.hackl@uni-passau.de>
  * @license     http://www.gnu.org/licenses/gpl-2.0.html GPL version 2
- * @category    Whakamahere
+ * @category    MediaContent
  */
 
-class MediaContentPlugin extends StudIPPlugin implements SystemPlugin {
+class MediaContentPlugin extends StudIPPlugin implements StandardPlugin {
 
     public function __construct() {
         parent::__construct();
@@ -24,14 +23,6 @@ class MediaContentPlugin extends StudIPPlugin implements SystemPlugin {
 
         // Localization
         bindtextdomain('mediacontent', realpath(__DIR__.'/locale'));
-
-        // Plugin only available if there are corresponding permissions.
-        if (Navigation::hasItem('/course')) {
-            $navigation = new Navigation($this->getDisplayName(),
-                PluginEngine::getURL($this, [], 'media'));
-
-            Navigation::addItem('/course/mediacontent', $navigation);
-        }
     }
 
     /**
@@ -46,6 +37,45 @@ class MediaContentPlugin extends StudIPPlugin implements SystemPlugin {
     {
         $metadata = $this->getMetadata();
         return $metadata['version'];
+    }
+
+    public function getIconNavigation($course_id, $last_visit, $user_id)
+    {
+        return null;
+    }
+
+    public function getTabNavigation($course_id)
+    {
+        if ($GLOBALS['user']->id == 'nobody') {
+            return [];
+        }
+
+        $mediacontent = new Navigation($this->getDisplayName());
+        $mediacontent->addSubNavigation('media', new Navigation($this->getDisplayName(),
+            PluginEngine::getURL($this, [], 'media')));
+
+        return compact('mediacontent');
+    }
+
+    /**
+     * @see StudipModule::getMetadata()
+     */
+    public function getMetadata()
+    {
+        return [
+            'summary' => dgettext('mediacontent', 'Einbindung von externen Videos aus Vimeo und Cloudfreigaben'),
+            'description' => dgettext('mediacontent', 'Hiermit können Sie Videos einbinden, die Sie in externen Clouds wie OneDrive oder iCloud freigegeben haben.'),
+            'category' => dgettext('mediacontent', 'Medien'),
+            'icon' => Icon::create('play', 'info')
+        ];
+    }
+
+    /**
+     * @see StandardPlugin::getInfoTemplate()
+     */
+    public function getInfoTemplate($course_id)
+    {
+        return null;
     }
 
     public function perform($unconsumed_path) {
