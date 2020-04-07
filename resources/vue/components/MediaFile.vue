@@ -33,23 +33,25 @@
                 Klicken Sie hier, um den Link in einem Fenster/Tab zu öffnen.
             </a>
         </div>
-        <div class="play-me">
-            <a v-if="!sourceChecked && !loading" @click="getMediumSrc">
+        <div v-if="!sourceChecked && !loading" class="play-me">
+            <a @click="getMediumSrc">
                 <studip-icon shape="play" size="48"
                              title="Video abspielen"></studip-icon>
                 <div>Video abspielen</div>
             </a>
-            <div v-if="loading" class="loading">
-                Daten werden geladen...
-            </div>
         </div>
-        <a v-if="sourceChecked && options.sources.length == 0" :href="medium.url" title="Abspielen" target="_blank">
-            <studip-icon shape="link-extern" size="64"></studip-icon>
-            <br>
-            Leider kann das Medium nicht automatisch angezeigt werden.
-            <br>
-            Klicken Sie hier, um den Link in einem Fenster/Tab zu öffnen.
-        </a>
+        <div v-if="loading" class="loading">
+            Daten werden geladen...
+        </div>
+        <div v-if="sourceChecked && options.sources.length == 0" class="cannot-play">
+            <a :href="medium.url" title="Abspielen" target="_blank">
+                <studip-icon shape="link-extern" size="48"></studip-icon>
+                <div>
+                    Leider kann das Medium nicht automatisch angezeigt werden.
+                    Klicken Sie hier, um den Link in einem Fenster/Tab zu öffnen.
+                </div>
+            </a>
+        </div>
     </section>
 </template>
 
@@ -125,17 +127,28 @@
             getMediumSrc: function() {
                 this.loading = true
                 fetch(this.createUrlWithId(this.realSrcUrl)).then((response) => {
+                    if (!response.ok) {
+                        throw response
+                    }
                     return response.json()
                 }).then((json) => {
                     this.sourceChecked = true
-                    if (json != null && json.src != null && json.type != null) {
-                        this.options.sources.push({
+                    if (json != null && json.src != null) {
+                        let source = {
                             src: json.src,
-                            type: json.type,
                             fluid: true
-                        })
+                        }
+                        if (json.type != null) {
+                            source.type = json.type
+                        }
+                        this.options.sources.push(source)
                         let video = document.createElement('video')
                         video.classList.add('video-js')
+                        video.setAttribute('src', json.src)
+                        video.setAttribute('controls', true)
+                        if (json.type != null) {
+                            video.setAttribute('type', json.type)
+                        }
                         this.$el.appendChild(video)
                         this.$el.querySelector('.play-me').style.display = 'none'
                         this.player = videojs(video, this.options)
@@ -147,13 +160,19 @@
                         })
                     }
                     this.loading = false
+                }).catch((error) => {
+                    this.loading = false
+                    this.sourceChecked = true
                 })
             },
             closeVideo: function() {
                 this.player = null
-                this.$el.querySelector('.video-js').remove()
+                const video = this.$el.querySelector('.video-js')
+                if (video != null) {
+                    video.remove()
+                }
                 this.sourceChecked = false
-                this.$el.querySelector('.play-me').style.display = null
+                this.loading = false
             },
             createUrlWithId: function(url) {
                 const parts = url.split('?')
@@ -170,6 +189,7 @@
 <style lang="scss">
     .date {
         .medium {
+            border: 1px solid #28497c;
             margin: 5px;
 
             header {
@@ -182,7 +202,7 @@
                 }
             }
 
-            .play-me {
+            .play-me, .loading, .cannot-play {
                 height: 54px;
                 vertical-align: center;
 
@@ -198,15 +218,17 @@
                         margin-bottom: 13px;
                     }
                 }
+            }
 
-                .loading {
-                    font-size: large;
-                    line-height: 54px;
-                    text-align: center;
-                }
+            .loading {
+                font-size: large;
+                line-height: 54px;
+                text-align: center;
             }
 
             .video-js {
+                height: unset !important;
+                width: unset !important;
                 max-width: calc(100% - 10px);
                 margin: 5px;
             }

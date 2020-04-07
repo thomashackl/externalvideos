@@ -96,6 +96,7 @@ class ExternalMediaFile extends SimpleORMap
     public function getVideoSource()
     {
         $cache = StudipCacheFactory::getCache();
+        $cache_lifetime = null;
 
         if ($cached = $cache->read('external_media_file_' . $this->id)) {
 
@@ -122,7 +123,8 @@ class ExternalMediaFile extends SimpleORMap
                 try {
                     $puppeteer = new Nesk\Puphpeteer\Puppeteer;
 
-                    $browser = $puppeteer->launch(['executablePath' => Config::get()->MEDIACONTENT_CHROME_PATH]);
+                    $browser = $puppeteer->launch(
+                        ['executablePath' => Config::get()->MEDIACONTENT_CHROME_PATH]);
 
                     $page = $browser->newPage();
                     $page->goto($this->url);
@@ -136,7 +138,7 @@ class ExternalMediaFile extends SimpleORMap
                             document.querySelector('div.page-button-three div[role=\"button\"]').click()
                         "));
 
-                        $page->waitForSelector('iframe', ['timeout' => 5000]);
+                        $page->waitForSelector('iframe', ['timeout' => 10000]);
                         $src = $page->evaluate(\Nesk\Rialto\Data\JsFunction::createWithBody("
                             return document.querySelector('iframe').src
                         "));
@@ -154,26 +156,27 @@ class ExternalMediaFile extends SimpleORMap
                     // iCloud Photos
                     } else if (mb_strpos($this->url, 'icloud.com/photos') !== false) {
 
-                        require_once(__DIR__ . '/../vendor/autoload.php');
+                        $handle = $page->waitForSelector('iframe',
+                            ['timeout' => 10000, 'visible' => true]);
+                        $frame = $handle->contentFrame();
+                        $frame->waitForSelector('.total');
 
-                        $page->waitForSelector('iframe', ['timeout' => 5000]);
+                        $frame->click('.derivative-image-container');
 
-                        $frameUrl = $page->evaluate(\Nesk\Rialto\Data\JsFunction::createWithBody("
-                            return document.querySelector('iframe').src
-                        "));
+                        $frame->waitForSelector('.pok-video-play-button',
+                            ['timeout' => 10000, 'visible' => true]);
 
-                        $page->goto($frameUrl);
-                        $page->waitForSelector('div.cw-list-item-view', ['timeout' => 5000]);
+                        $page->keyboard->press('Space');
 
-                        $page->evaluate(\Nesk\Rialto\Data\JsFunction::createWithBody("
-                            document.querySelector('div.cw-list-item-view').click()
-                        "));
+                        $frame->waitForSelector('.pok-video-container video',
+                            ['timeout' => 10000, 'visible' => true]);
 
-                        $page->waitForSelector('video', ['timeout' => 5000]);
-                        $data = $page->evaluate(\Nesk\Rialto\Data\JsFunction::createWithBody("
-                            let element = document.querySelector('video')
-                            return { src: element.src, type: element.type }
-                        "));
+                        $video = $frame->querySelector('.pok-video-container video');
+
+                        $data = [
+                            'src' => $video->getProperty('src')->jsonValue(),
+                            'type' => $video->getProperty('type')->jsonValue()
+                        ];
 
                         // iCloud Photo links change periodically, keep in cache for three hours.
                         $cache_lifetime = 10800;
@@ -205,15 +208,17 @@ class ExternalMediaFile extends SimpleORMap
 
                     $browser->close();
 
-                    // Cache the direct video link.
-                    $cache->write('external_media_file_' . $this->id, $data, $cache_lifetime);
-
                 } catch (Exception $e) {
 
                     $data = null;
 
                 }
 
+            }
+
+            // Cache the direct video link.
+            if ($cache_lifetime != null) {
+                $cache->write('external_media_file_' . $this->id, $data, $cache_lifetime);
             }
 
             return $data;
