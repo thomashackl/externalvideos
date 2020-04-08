@@ -15,8 +15,7 @@
  *
  * @property int file_id database column
  * @property string sharelink database column
- * @property string mediumurl database column
- * @property string mimetype database column
+ * @property string url database column
  * @property string title database column
  * @property int position database column
  * @property string course_id database column
@@ -98,7 +97,7 @@ class ExternalMediaFile extends SimpleORMap
         $cache = StudipCacheFactory::getCache();
         $cache_lifetime = null;
 
-        if ($cached = $cache->read('external_media_file_' . $this->id)) {
+        if ($cached = $cache->read($this->url)) {
 
             return $cached;
 
@@ -216,7 +215,7 @@ class ExternalMediaFile extends SimpleORMap
 
             // Cache the direct video link.
             if ($cache_lifetime != null) {
-                $cache->write('external_media_file_' . $this->id, $data, $cache_lifetime);
+                $cache->write($this->url, $data, $cache_lifetime);
             }
 
             return $data;
