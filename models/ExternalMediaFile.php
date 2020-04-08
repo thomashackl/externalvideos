@@ -154,19 +154,23 @@ class ExternalMediaFile extends SimpleORMap
                     } else if (mb_strpos($this->url, 'icloud.com/photos') !== false) {
 
                         $handle = $page->waitForSelector('iframe',
-                            ['timeout' => 10000, 'visible' => true]);
+                            ['timeout' => 15000, 'visible' => true]);
                         $frame = $handle->contentFrame();
-                        $frame->waitForSelector('.total');
+                        //$frame->waitForSelector('.total');
+                        $frame->waitForSelector('.derivative-image-container', ['visible' => true]);
 
-                        $frame->click('.derivative-image-container');
+                        $frame->evaluate(\Nesk\Rialto\Data\JsFunction::createWithBody("
+                            document.querySelector('.derivative-image-container').click()
+                        "));
+                        //$frame->click('.derivative-image-container');
 
                         $frame->waitForSelector('.pok-video-play-button',
-                            ['timeout' => 10000, 'visible' => true]);
+                            ['timeout' => 15000, 'visible' => true]);
 
                         $page->keyboard->press('Space');
 
                         $frame->waitForSelector('.pok-video-container video',
-                            ['timeout' => 10000, 'visible' => true]);
+                            ['timeout' => 15000, 'visible' => true]);
 
                         $video = $frame->querySelector('.pok-video-container video');
 
