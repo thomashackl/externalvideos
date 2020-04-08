@@ -134,9 +134,7 @@ class ExternalMediaFile extends SimpleORMap
 
                         $page->waitForSelector('div.page-button-three div[role="button"]', ['timeout' => 5000]);
 
-                        $page->evaluate(\Nesk\Rialto\Data\JsFunction::createWithBody("
-                            document.querySelector('div.page-button-three div[role=\"button\"]').click()
-                        "));
+                        $page->click('div.page-button-three div[role="button"]');
 
                         $page->waitForSelector('iframe', ['timeout' => 10000]);
                         $src = $page->evaluate(\Nesk\Rialto\Data\JsFunction::createWithBody("
