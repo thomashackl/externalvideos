@@ -114,6 +114,17 @@ class ExternalMediaFile extends SimpleORMap
                 // OneDrive Business links don't really change, keep in cache for one day.
                 $cache_lifetime = 86400;
 
+                // Sync & Share (Powerfolder)
+            } else if (mb_strpos($this->url, '/getlink/') !== false) {
+
+                $data = [
+                    'src' => str_replace('/getlink/', '/dl/', $this->url),
+                    'type' => null
+                ];
+
+                // Keep in cache for one day, this link should be stable.
+                $cache_lifetime = 86400;
+
             // File is somewhere else: use Puppeteer
             } else {
 
