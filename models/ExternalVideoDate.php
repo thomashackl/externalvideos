@@ -1,8 +1,8 @@
 <?php
 
 /**
- * ExternalMediaFileDate.php
- * model class for external media files assignments to course dates.
+ * ExternalVideoFileDate.php
+ * model class for external videos files assignments to course dates.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -11,24 +11,24 @@
  *
  * @author      Thomas Hackl <thomas.hackl@uni-passau.de>
  * @license     http://www.gnu.org/licenses/gpl-2.0.html GPL version 2
- * @category    MediaContent
+ * @category    Videos
  *
- * @property int file_id database column
+ * @property int video_id database column
  * @property string date_id database column
  * @property string mkdate database column
  * @property string chdate database column
  */
 
-class ExternalMediaFileDate extends SimpleORMap
+class ExternalVideoDate extends SimpleORMap
 {
 
     protected static function configure($config = [])
     {
-        $config['db_table'] = 'external_media_dates';
+        $config['db_table'] = 'external_videos_dates';
         $config['belongs_to']['file'] = [
-            'class_name' => 'ExternalMediaFile',
-            'foreign_key' => 'file_id',
-            'assoc_foreign_key' => 'file_id'
+            'class_name' => 'ExternalVideo',
+            'foreign_key' => 'video_id',
+            'assoc_foreign_key' => 'video_id'
         ];
         $config['belongs_to']['date'] = [
             'class_name' => 'CourseDate',

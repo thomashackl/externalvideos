@@ -1,7 +1,7 @@
 {
-    "name": "@studip/mediacontent",
+    "name": "@studip/videos",
     "version": "0.1.0",
-    "description": "Video and audio from external cloud services for Stud.IP courses",
+    "description": "Videos from Vimeo or external cloud services for Stud.IP courses",
     "private": true,
     "scripts": {
         "wds": "webpack-dev-server --progress --config webpack.dev-server.js",
@@ -12,7 +12,7 @@
     "license": "GPL-2.0",
     "repository": {
         "type": "git",
-        "url": "https://vcs.uni-passau.de/referat-applikationen/studip/mediacontent"
+        "url": "https://vcs.uni-passau.de/referat-applikationen/studip/videos"
     },
     "dependencies": {
         "@nesk/puphpeteer": "^1.6.0"

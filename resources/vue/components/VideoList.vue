@@ -13,8 +13,8 @@
                 </h1>
             </header>
             <template v-if="openDates.includes(date.id)">
-                <media-file v-for="medium in date.media" :key="medium.id" :medium="medium"
-                            :get-src-url="getMediaSrcUrl" :edit-url="editUrl" :delete-url="deleteUrl"></media-file>
+                <video-file v-for="video in date.videos" :key="video.id" :video="video"
+                            :get-src-url="getVideoSrcUrl" :edit-url="editUrl" :delete-url="deleteUrl"></video-file>
             </template>
         </section>
     </div>
@@ -22,22 +22,22 @@
 
 <script>
     import StudipMessagebox from './StudipMessagebox'
-    import MediaFile from './MediaFile'
+    import VideoFile from './VideoFile'
     import StudipIcon from './StudipIcon'
 
     export default {
-        name: 'MediaList',
+        name: 'VideoList',
         components: {
             StudipIcon,
             StudipMessagebox,
-            MediaFile
+            VideoFile
         },
         props: {
             dates: {
                 type: Array,
                 default: () => []
             },
-            getMediaSrcUrl: {
+            getVideoSrcUrl: {
                 type: String
             },
             editUrl: {

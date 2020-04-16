@@ -1,7 +1,7 @@
-pluginname=Medieninhalte
-pluginclassname=MediaContentPlugin
+pluginname=ExternalVideos
+pluginclassname=ExternalVideoPlugin
 origin=upa
 version=1.1
-description=Media content like external videos or podcasts
+description=Videos from Vimeo or external cloud shares
 studipMinVersion=4.4.99
 studipMaxVersion=4.9.99

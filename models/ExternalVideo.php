@@ -1,8 +1,8 @@
 <?php
 
 /**
- * ExternalMediaFile.php
- * model class for external media files that shall be integrated in Stud.IP courses.
+ * ExternalVideoFile.php
+ * model class for external videos files that shall be integrated in Stud.IP courses.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -11,9 +11,9 @@
  *
  * @author      Thomas Hackl <thomas.hackl@uni-passau.de>
  * @license     http://www.gnu.org/licenses/gpl-2.0.html GPL version 2
- * @category    MediaContent
+ * @category    Videos
  *
- * @property int file_id database column
+ * @property int video_id database column
  * @property string sharelink database column
  * @property string url database column
  * @property string title database column
@@ -26,12 +26,12 @@
  * @property string chdate database column
  */
 
-class ExternalMediaFile extends SimpleORMap
+class ExternalVideo extends SimpleORMap
 {
 
     protected static function configure($config = [])
     {
-        $config['db_table'] = 'external_media_files';
+        $config['db_table'] = 'external_videos';
         $config['has_one']['creator'] = [
             'class_name' => 'User',
             'foreign_key' => 'user_id',
@@ -43,9 +43,9 @@ class ExternalMediaFile extends SimpleORMap
             'assoc_foreign_key' => 'seminar_id'
         ];
         $config['has_many']['dates'] = [
-            'class_name' => 'ExternalMediaFileDate',
-            'foreign_key' => 'file_id',
-            'assoc_foreign_key' => 'file_id',
+            'class_name' => 'ExternalVideoDate',
+            'foreign_key' => 'video_id',
+            'assoc_foreign_key' => 'video_id',
             'on_store' => 'store',
             'on_delete' => 'delete'
         ];
@@ -103,19 +103,8 @@ class ExternalMediaFile extends SimpleORMap
 
         } else {
 
-            // OneDrive Business
-            if (mb_strpos($this->url, 'my.sharepoint.com') !== false) {
-
-                $data = [
-                    'src' => mb_substr($this->url, 0, mb_strpos($this->url, '?')) . '?download=1',
-                    'type' => 'video/mp4'
-                ];
-
-                // OneDrive Business links don't really change, keep in cache for one day.
-                $cache_lifetime = 86400;
-
-                // Sync & Share (Powerfolder)
-            } else if (mb_strpos($this->url, '/getlink/') !== false) {
+            // Sync & Share (Powerfolder)
+            if (mb_strpos($this->url, '/getlink/') !== false) {
 
                 $data = [
                     'src' => str_replace('/getlink/', '/dl/', $this->url),
@@ -134,13 +123,32 @@ class ExternalMediaFile extends SimpleORMap
                     $puppeteer = new Nesk\Puphpeteer\Puppeteer;
 
                     $browser = $puppeteer->launch(
-                        ['executablePath' => Config::get()->MEDIACONTENT_CHROME_PATH]);
+                        ['executablePath' => Config::get()->EXTERNAL_VIDEOS_CHROME_PATH]);
 
                     $page = $browser->newPage();
                     $page->goto($this->url);
 
+                    // OneDrive Business
+                    if (mb_strpos($this->url, 'my.sharepoint.com') !== false) {
+
+                        $page->goto(mb_substr($this->url, 0, mb_strpos($this->url, '?')));
+
+                        $page->waitForSelector('video', ['timeout' => 5000]);
+                        $video = $page->querySelector('video source');
+
+                        $src = $video->getProperty('src')->jsonValue();
+                        $type = $video->getProperty('type')->jsonValue();
+
+                        $data = [
+                            'src' => $src,
+                            'type' => $type
+                        ];
+
+                        // OneDrive Business links don't really change, keep in cache for one day.
+                        $cache_lifetime = 86400;
+
                     // iCloud Drive
-                    if (mb_strpos($this->url, 'icloud.com/iclouddrive') !== false) {
+                    } else if (mb_strpos($this->url, 'icloud.com/iclouddrive') !== false) {
 
                         $page->waitForSelector('div.page-button-three div[role="button"]', ['timeout' => 5000]);
 
@@ -151,7 +159,7 @@ class ExternalMediaFile extends SimpleORMap
                             return document.querySelector('iframe').src
                         "));
 
-                        $type = 'video/mp4';
+                        $type = null;
 
                         $data = [
                             'src' => $src,

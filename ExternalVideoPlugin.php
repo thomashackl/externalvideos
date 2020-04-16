@@ -1,6 +1,6 @@
 <?php
 /**
- * MediaContentPlugin.class.php
+ * ExternalVideoPlugin.class.php
  *
  * Plugin for embedding video shares from external clouds.
  *
@@ -11,10 +11,10 @@
  *
  * @author      Thomas Hackl <thomas.hackl@uni-passau.de>
  * @license     http://www.gnu.org/licenses/gpl-2.0.html GPL version 2
- * @category    MediaContent
+ * @category    Videos
  */
 
-class MediaContentPlugin extends StudIPPlugin implements StandardPlugin {
+class ExternalVideoPlugin extends StudIPPlugin implements StandardPlugin {
 
     public function __construct() {
         parent::__construct();
@@ -22,7 +22,7 @@ class MediaContentPlugin extends StudIPPlugin implements StandardPlugin {
         StudipAutoloader::addAutoloadPath(__DIR__ . '/models');
 
         // Localization
-        bindtextdomain('mediacontent', realpath(__DIR__.'/locale'));
+        bindtextdomain('videos', realpath(__DIR__.'/locale'));
     }
 
     /**
@@ -30,7 +30,7 @@ class MediaContentPlugin extends StudIPPlugin implements StandardPlugin {
      */
     public function getDisplayName()
     {
-        return dgettext('mediacontent', 'Medieninhalte');
+        return dgettext('videos', 'Videos');
     }
 
     public function getVersion()
@@ -50,11 +50,11 @@ class MediaContentPlugin extends StudIPPlugin implements StandardPlugin {
             return [];
         }
 
-        $mediacontent = new Navigation($this->getDisplayName());
-        $mediacontent->addSubNavigation('media', new Navigation($this->getDisplayName(),
-            PluginEngine::getURL($this, [], 'media')));
+        $videos = new Navigation($this->getDisplayName());
+        $videos->addSubNavigation('videos', new Navigation($this->getDisplayName(),
+            PluginEngine::getURL($this, [], 'videos')));
 
-        return compact('mediacontent');
+        return compact('videos');
     }
 
     /**
@@ -63,9 +63,9 @@ class MediaContentPlugin extends StudIPPlugin implements StandardPlugin {
     public function getMetadata()
     {
         return [
-            'summary' => dgettext('mediacontent', 'Einbindung von externen Videos aus Vimeo und Cloudfreigaben'),
-            'description' => dgettext('mediacontent', 'Hiermit können Sie Videos einbinden, die Sie in externen Clouds wie OneDrive oder iCloud freigegeben haben.'),
-            'category' => dgettext('mediacontent', 'Medien'),
+            'summary' => dgettext('videos', 'Einbindung von externen Videos aus Vimeo und Cloudfreigaben'),
+            'description' => dgettext('videos', 'Hiermit können Sie Videos einbinden, die Sie in externen Clouds wie OneDrive oder iCloud freigegeben haben.'),
+            'category' => dgettext('videos', 'Medien'),
             'icon' => Icon::create('play', 'info')
         ];
     }
@@ -85,7 +85,7 @@ class MediaContentPlugin extends StudIPPlugin implements StandardPlugin {
         $dispatcher = new Trails_Dispatcher(
             $this->getPluginPath(),
             rtrim(PluginEngine::getLink($this, [], null), '/'),
-            'media'
+            'videos'
         );
         URLHelper::addLinkParam('cid', $range_id);
 

@@ -8,7 +8,7 @@ const assetsPath = path.resolve(__dirname, 'resources/assets');
 
 module.exports = {
     entry: {
-        "mediacontent": assetsPath + "/javascripts/entry-mediacontent.js"
+        "externalvideos": assetsPath + "/javascripts/entry-videos.js"
     },
     output: {
         path: path.resolve(__dirname, 'assets'),

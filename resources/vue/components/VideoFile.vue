@@ -1,16 +1,16 @@
 <template>
-    <section class="medium" :id="'medium-' + medium.id">
+    <section class="video" :id="'video-' + video.id">
         <header>
-            {{ medium.title }}
-            <template v-if="medium.visible_from != null || medium.visible_until != null">
-                <template v-if="medium.visible_from != null && medium.visible_until == null">
-                    (sichtbar ab {{ medium.visible_from }})
+            {{ video.title }}
+            <template v-if="video.visible_from != null || video.visible_until != null">
+                <template v-if="video.visible_from != null && video.visible_until == null">
+                    (sichtbar ab {{ video.visible_from }})
                 </template>
-                <template v-if="medium.visible_from == null && medium.visible_until != null">
-                    (sichtbar bis {{ medium.visible_until }})
+                <template v-if="video.visible_from == null && video.visible_until != null">
+                    (sichtbar bis {{ video.visible_until }})
                 </template>
-                <template v-if="medium.visible_from != null && medium.visible_until != null">
-                    (sichtbar von {{ medium.visible_from }} bis {{ medium.visible_until }})
+                <template v-if="video.visible_from != null && video.visible_until != null">
+                    (sichtbar von {{ video.visible_from }} bis {{ video.visible_until }})
                 </template>
             </template>
             <nav class="actions">
@@ -21,20 +21,20 @@
                     <a :href="realEditUrl" title="Bearbeiten" data-dialog="size=auto">
                         <studip-icon shape="edit" size="16" role="info_alt"></studip-icon>
                     </a>
-                    <a :href="realDeleteUrl" title="Löschen" data-confirm="Wollen Sie das Medium wirklich löschen?">
+                    <a :href="realDeleteUrl" title="Löschen" data-confirm="Wollen Sie das Video wirklich löschen?">
                         <studip-icon shape="trash" size="16" role="info_alt"></studip-icon>
                     </a>
                 </template>
             </nav>
         </header>
         <div class="video-error" v-if="playError">
-            <a :href="medium.url" title="Link öffnen" target="_blank">
+            <a :href="video.url" title="Link öffnen" target="_blank">
                 Kann das Video nicht abgespielt werden?
                 Klicken Sie hier, um den Link in einem Fenster/Tab zu öffnen.
             </a>
         </div>
         <div v-if="!sourceChecked && !loading" class="play-me">
-            <a @click="getMediumSrc">
+            <a @click="getVideoSrc">
                 <studip-icon shape="play" size="48"
                              title="Video abspielen"></studip-icon>
                 <div>Video abspielen</div>
@@ -44,10 +44,10 @@
             Daten werden geladen...
         </div>
         <div v-if="sourceChecked && options.sources.length == 0" class="cannot-play">
-            <a :href="medium.url" title="Abspielen" target="_blank">
+            <a :href="video.url" title="Abspielen" target="_blank">
                 <studip-icon shape="link-extern" size="48"></studip-icon>
                 <div>
-                    Leider kann das Medium nicht automatisch angezeigt werden.
+                    Leider kann das Video nicht automatisch angezeigt werden.
                     Klicken Sie hier, um den Link in einem Fenster/Tab zu öffnen.
                 </div>
             </a>
@@ -60,12 +60,12 @@
     import videojs from 'video.js'
 
     export default {
-        name: 'MediaFile',
+        name: 'VideoFile',
         components: {
             StudipIcon
         },
         props: {
-            medium: {
+            video: {
                 type: Object
             },
             getSrcUrl: {
@@ -124,7 +124,7 @@
             }
         },
         methods: {
-            getMediumSrc: function() {
+            getVideoSrc: function() {
                 this.loading = true
                 fetch(this.createUrlWithId(this.realSrcUrl)).then((response) => {
                     if (!response.ok) {
@@ -176,7 +176,7 @@
             },
             createUrlWithId: function(url) {
                 const parts = url.split('?')
-                let fullUrl = parts[0] + '/' + this.medium.id
+                let fullUrl = parts[0] + '/' + this.video.id
                 if (parts.length > 1) {
                     fullUrl += '?' + parts[1]
                 }
@@ -188,7 +188,7 @@
 
 <style lang="scss">
     .date {
-        .medium {
+        .video {
             border: 1px solid #28497c;
             margin: 5px;
 

@@ -27,11 +27,11 @@ class HeadlessChrome extends Migration {
     public function up()
     {
         // Provide config options for weekdays and times for planning and statistics
-        Config::get()->create('MEDIACONTENT_CHROME_PATH', [
+        Config::get()->create('EXTERNAL_VIDEOS_CHROME_PATH', [
             'value' => '/usr/bin/chrome',
             'type' => 'string',
             'range' => 'global',
-            'section' => 'mediacontent',
+            'section' => 'externalvideos',
             'description' => 'Pfad zum Starten von Chrome'
         ]);
     }
@@ -42,7 +42,7 @@ class HeadlessChrome extends Migration {
     public function down()
     {
         // Remove config entry.
-        Config::get()->delete('MEDIACONTENT_CHROME_PATH');
+        Config::get()->delete('Videos_CHROME_PATH');
     }
 
 }

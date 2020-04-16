@@ -1,4 +1,4 @@
-__webpack_public_path__ = window.STUDIP.ABSOLUTE_URI_STUDIP + 'plugins_packages/upa/MediaContentPlugin/assets/'
+__webpack_public_path__ = window.STUDIP.ABSOLUTE_URI_STUDIP + 'plugins_packages/upa/ExternalVideoPlugin/assets/'
 
 import Vue from 'vue'
 
@@ -12,7 +12,7 @@ window.Vue = Vue
  * Eg. ./components/ExampleComponent.vue -> <example-component></example-component>
  */
 
-const files = require.context('../../vue/components', true, /MediaList$/i)
+const files = require.context('../../vue/components', true, /VideoList$/i)
 
 files.keys().map(key =>
     Vue.component(
