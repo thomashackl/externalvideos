@@ -6,7 +6,7 @@
         </legend>
         <section>
             <label for="url">
-                Adresse der Datei
+                Freigabelink
             </label>
             <input type="url" name="url" id="url" maxlength="2048" value="<?php echo htmlReady($video->url) ?>">
         </section>

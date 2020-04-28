@@ -1,5 +1,7 @@
 {
     "require": {
-        "nesk/puphpeteer": "^1.6"
+        "nesk/puphpeteer": "^1.6",
+        "vimeo/vimeo-api": "^3.0",
+        "firebase/php-jwt": "^5.2"
     }
 }
