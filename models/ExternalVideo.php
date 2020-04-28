@@ -97,11 +97,11 @@ class ExternalVideo extends SimpleORMap
         $cache = StudipCacheFactory::getCache();
         $cache_lifetime = null;
 
-        if ($cached = $cache->read($this->url)) {
+        //if ($cached = $cache->read($this->url)) {
 
-            return $cached;
+        //    return $cached;
 
-        } else {
+        //} else {
 
             // Sync & Share (Powerfolder)
             if (mb_strpos($this->url, '/getlink/') !== false) {
@@ -122,8 +122,7 @@ class ExternalVideo extends SimpleORMap
                 try {
                     $puppeteer = new Nesk\Puphpeteer\Puppeteer;
 
-                    $browser = $puppeteer->launch(
-                        ['executablePath' => Config::get()->EXTERNAL_VIDEOS_CHROME_PATH]);
+                    $browser = $puppeteer->launch();
 
                     $page = $browser->newPage();
                     $page->goto($this->url);
@@ -174,6 +173,7 @@ class ExternalVideo extends SimpleORMap
 
                         $handle = $page->waitForSelector('iframe',
                             ['timeout' => 15000, 'visible' => true]);
+
                         $frame = $handle->contentFrame();
                         //$frame->waitForSelector('.total');
                         $frame->waitForSelector('.derivative-image-container', ['visible' => true]);
@@ -181,7 +181,6 @@ class ExternalVideo extends SimpleORMap
                         $frame->evaluate(\Nesk\Rialto\Data\JsFunction::createWithBody("
                             document.querySelector('.derivative-image-container').click()
                         "));
-                        //$frame->click('.derivative-image-container');
 
                         $frame->waitForSelector('.pok-video-play-button',
                             ['timeout' => 15000, 'visible' => true]);
@@ -206,19 +205,15 @@ class ExternalVideo extends SimpleORMap
 
                         $page->waitForSelector('video', ['timeout' => 5000]);
 
-                        $matches = [];
-                        preg_match('/(<video.+>)/', $page->content(), $matches);
+                        $dom = new DOMDocument();
+                        @$dom->loadHTML($page->content());
+                        $videos = $dom->getElementsByTagName('video');
 
-                        // Get video source.
-                        $start = mb_strpos($matches[1], 'src="');
-                        $src = mb_substr($matches[1], $start, mb_strpos($matches[1], '"', $start + 5));
-                        // Get video type.
-                        $start = mb_strpos($matches[1], 'type="');
-                        $type = mb_substr($matches[1], $start, mb_strpos($matches[1], '"', $start + 6));
+                        $video = $videos->item(0);
 
                         $data = [
-                            'src' => $src,
-                            'type' => $type
+                            'src' => $video->getAttribute('src'),
+                            'type' => $video->getAttribute('type')
                         ];
 
                         // Video links should be stable, keep in cache for one day.
@@ -242,7 +237,7 @@ class ExternalVideo extends SimpleORMap
             }
 
             return $data;
-        }
+        //}
     }
 
 }
