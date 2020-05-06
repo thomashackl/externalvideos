@@ -3,7 +3,7 @@
         <header>
             <div>
                 {{ video.title }}
-                <div class="visibility" v-if="video.visible_from != null || video.visible_until != null">
+                <div class="visibility">
                     <studip-icon shape="visibility-visible" role="info_alt"></studip-icon>
                     <template v-if="video.visible_from != null && video.visible_until == null">
                         ab {{ video.visible_from }}
@@ -13,6 +13,9 @@
                     </template>
                     <template v-if="video.visible_from != null && video.visible_until != null">
                         {{ video.visible_from }} bis {{ video.visible_until }}
+                    </template>
+                    <template v-if="video.visible_from == null && video.visible_until == null">
+                        unbegrenzt
                     </template>
                 </div>
             </div>
@@ -30,7 +33,13 @@
                 </template>
             </nav>
         </header>
-        <div :id="'vimeo-video-' + video.id"></div>
+        <div :id="'vimeo-video-' + video.id" :class="playError ? 'cannot-play' : ''">
+            <studip-icon v-if="playError" shape="decline" role="info" width="32" height="32"></studip-icon>
+            <div v-if="playError">
+                Das Video wurde nicht auf Vimeo gefunden. Möglicherweise
+                wird es gerade vorbereitet und ist in Kürze verfügbar.
+            </div>
+        </div>
     </section>
 </template>
 
@@ -67,11 +76,17 @@
                     title: false
                 },
                 player: null,
-                playing: false
+                playing: false,
+                playError: false
             }
         },
         mounted() {
             this.player = new Player('vimeo-video-' + this.video.id, this.options)
+            this.player.ready()
+                .then((response) => {
+                }).catch((error) => {
+                    this.playError = true
+                })
 
             this.player.on('play', () => {
                 this.playing = true

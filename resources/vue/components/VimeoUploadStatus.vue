@@ -53,7 +53,7 @@
             this.prepareStatus = 'Bereite den Video-Upload vor...'
 
             VimeoAPI.prepareUpload(
-                document.querySelector('#name').value,
+                document.querySelector('#title').value,
                 document.querySelector('#description').value,
                 file.size
             ).then((result) => {
@@ -86,7 +86,7 @@
                                         bus.$emit('vimeo-upload-success', {id: videoId, url: url})
                                     }, 500)
                                 }).catch((error) => {
-                                    this.moveStatus += ' fehlgeschlagen\n' + error
+                                    this.moveStatus += ' fehlgeschlagen\n' + error.statusText
                                     this.moveSuccess = 'error'
                                     console.log('Error')
                                     console.log(error)
@@ -95,7 +95,7 @@
                         },
                         onError: (error) => {
                             this.uploadSuccess = 'error'
-                            this.uploadStatus += ' Fehler.\n' + error
+                            this.uploadStatus += ' Fehler.\n' + error.statusText
                             console.log('Error on tus upload')
                             console.log(error)
                         },

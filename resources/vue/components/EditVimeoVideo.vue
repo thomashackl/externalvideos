@@ -2,7 +2,7 @@
     <form class="default" ref="form" :action="storeUrl" method="post" @submit.prevent="uploadVideo">
         <fieldset v-if="!video.id">
             <legend>
-                Videodatei
+                <span class="required">Videodatei</span>
             </legend>
             <section>
                 <input type="file" id="video" accept="video/*" @change="setFiles">
@@ -17,14 +17,14 @@
                     <span class="required">Name</span>
                 </label>
                 <input type="text" name="title" id="title" maxlength="255"
-                       placeholder="Name des Videos eingeben" :value="video.title">
+                       placeholder="Name des Videos eingeben" v-model="title">
             </section>
             <section v-if="!video.id">
                 <label for="description">
-                    <span class="required">Beschreibung</span>
+                    Beschreibung
                 </label>
                 <textarea name="description" id="description" maxlength="1024"
-                          placeholder="Beschreibungstext des Videos eingeben" :value="video.description"></textarea>
+                          placeholder="Beschreibungstext des Videos eingeben" v-model="description"></textarea>
             </section>
         </fieldset>
         <fieldset>
@@ -36,18 +36,14 @@
                     von
                 </label>
                 <input type="text" name="visible_from" id="visible-from" maxlength="15"
-                       placeholder="unbegrenzt"
-                       v-model="video.visible_from"
-                       data-datetime-picker>
+                       placeholder="unbegrenzt" v-model="visibleFrom" data-datetime-picker>
             </section>
             <section class="col-3">
                 <label for="visible-until" class="undecorated">
                     bis
                 </label>
                 <input type="text" name="visible_until" id="visible-until" maxlength="15"
-                       placeholder="unbegrenzt"
-                       v-model="video.visible_until"
-                       data-datetime-picker='{">=":"#visible-from"}'>
+                       placeholder="unbegrenzt" v-model="visibleUntil" data-datetime-picker='{">=":"#visible-from"}'>
             </section>
         </fieldset>
         <fieldset v-if="dates.length > 0">
@@ -67,7 +63,8 @@
             </section>
         </fieldset>
         <footer data-dialog-button>
-            <studip-button name="store" class="accept" label="Speichern" :prevent-default="false"></studip-button>
+            <studip-button name="store" class="accept" label="Speichern" :prevent-default="false"
+                           :disabled="title == '' || (video.id || files.length == 0)"></studip-button>
             <studip-link-button name="cancel" class="cancel" label="Abbrechen" :href="overviewUrl"></studip-link-button>
         </footer>
     </form>
@@ -108,15 +105,19 @@
         },
         data() {
             return {
-                files: []
+                files: [],
+                title: this.video.title,
+                description: this.video.description,
+                visibleFrom: this.video.visible_from,
+                visibleUntil: this.video.visible_until
             }
         },
         methods: {
             setFiles: function(event) {
                 this.files = event.target.files
-                if (!this.video.title) {
+                if (this.video.title == '') {
                     let filename = this.files[0].name
-                    this.video.title = filename.substring(0, filename.lastIndexOf('.')) || filename
+                    this.title = filename.substring(0, filename.lastIndexOf('.')) || filename
                 }
             },
             uploadVideo: function(event) {
@@ -150,7 +151,7 @@
                         this.$refs.form.submit()
                     })
                     bus.$on('vimeo-upload-error', (videoId) => {
-                        console.log('Upload failed, Video ID is ' + videoId + '.')
+                        console.log('Upload failed, Video ID is ' + videoId.id + '.')
                     })
                 }
             }

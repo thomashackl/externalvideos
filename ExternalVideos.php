@@ -1,6 +1,6 @@
 <?php
 /**
- * ExternalVideoPlugin.class.php
+ * ExternalVideos.class.php
  *
  * Plugin for embedding video shares from external clouds.
  *
@@ -14,7 +14,7 @@
  * @category    Videos
  */
 
-class ExternalVideoPlugin extends StudIPPlugin implements StandardPlugin, SystemPlugin {
+class ExternalVideos extends StudIPPlugin implements StandardPlugin, SystemPlugin {
 
     public function __construct() {
         parent::__construct();
@@ -68,12 +68,22 @@ class ExternalVideoPlugin extends StudIPPlugin implements StandardPlugin, System
      */
     public function getMetadata()
     {
-        return [
-            'summary' => dgettext('videos', 'Einbindung von externen Videos aus Vimeo und Cloudfreigaben'),
-            'description' => dgettext('videos', 'Hiermit können Sie Videos einbinden, die Sie in externen Clouds wie OneDrive oder iCloud freigegeben haben.'),
-            'category' => dgettext('videos', 'Medien'),
-            'icon' => Icon::create('play', 'info')
-        ];
+        $data = parent::getMetadata();
+
+        $data['summary'] = dgettext('videos', 'Einbindung von externen Videos aus Vimeo und Cloudfreigaben');
+        $data['description'] = dgettext('videos', 'Hier können Sie eigene Videos auf mehrere Arten ' .
+            'in Ihre Veranstaltungen einbinden. Laden Sie direkt aus Stud.IP Videos zu Vimeo hoch oder ' .
+            'speichern Sie sie in einen Cloud wie OneDrive oder iCloud Drive und binden Sie die Freigaben ' .
+            'direkt hier als Video ein. Sie können selbst festlegen, von wann bis wann ein Video für die ' .
+            'Teilnehmenden sichtbar sein soll und es zur Strukturierung einem Veranstaltungstermin zuordnen.');
+        $data['category'] = dgettext('videos', 'Medien');
+        $data['keywords'] = dgettext('videos', 'Videos direkt aus Stud.IP zu Vimeo hochladen;' .
+            'Videos aus Cloudfreigaben einbinden;zeitlich gesteuerte Sichtbarkeit;Zuordnung zu ' .
+            'Veranstaltungsterminen');
+        $data['icon'] = Icon::create('video', 'info');
+        $data['screenshot'] = 'assets/images/Videoliste.jpg';
+
+        return $data;
     }
 
     /**

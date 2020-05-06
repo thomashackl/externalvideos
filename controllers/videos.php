@@ -69,8 +69,8 @@ class VideosController extends AuthenticatedController {
                     'externalId' => $video->external_id,
                     'url' => $video->url,
                     'title' => $video->title,
-                    'visible_from' => $video->visible_from != null ? $video->visible_from->format('d.m.Y H:i') : null,
-                    'visible_until' => $video->visible_until != null ? $video->visible_until->format('d.m.Y H:i') : null
+                    'visible_from' => $video->visible_from != null ? $video->visible_from->format('d.m.y H:i') : null,
+                    'visible_until' => $video->visible_until != null ? $video->visible_until->format('d.m.y H:i') : null
                 ];
 
             } else {
@@ -89,8 +89,8 @@ class VideosController extends AuthenticatedController {
                     'externalId' => $video->external_id,
                     'url' => $video->url,
                     'title' => $video->title,
-                    'visible_from' => $video->visible_from != null ? $video->visible_from->format('d.m.Y H:i') : null,
-                    'visible_until' => $video->visible_until != null ? $video->visible_until->format('d.m.Y H:i') : null
+                    'visible_from' => $video->visible_from != null ? $video->visible_from->format('d.m.y H:i') : null,
+                    'visible_until' => $video->visible_until != null ? $video->visible_until->format('d.m.y H:i') : null
                 ];
 
             }
@@ -282,7 +282,7 @@ class VideosController extends AuthenticatedController {
         }
         $video->course_id = $this->course->id;
         $video->user_id = $GLOBALS['user']->id;
-        $video->title = Request::get('name');
+        $video->title = Request::get('title');
         $video->external_id = Request::get('external_id');
         $video->url = Request::get('url');
 

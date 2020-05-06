@@ -14,8 +14,9 @@
             </header>
             <div v-if="openDates.includes(date.id)">
                 <template v-for="video in date.videos">
-                    <video-file v-if="video.type == 'share'" :key="video.id" :video="video"
-                                :get-src-url="getVideoSrcUrl" :edit-url="editUrl" :delete-url="deleteUrl"></video-file>
+                    <shared-video v-if="video.type == 'share'" :key="video.id" :video="video"
+                                  :get-src-url="getVideoSrcUrl" :edit-url="editUrl"
+                                  :delete-url="deleteUrl"></shared-video>
                     <vimeo-video v-if="video.type == 'vimeo'" :key="video.id" :video="video"
                                  :edit-url="editUrl" :delete-url="deleteUrl"></vimeo-video>
                 </template>
@@ -26,16 +27,16 @@
 
 <script>
     import StudipMessagebox from './StudipMessagebox'
-    import VideoFile from './VideoFile'
+    import SharedVideo from './SharedVideo'
     import VimeoVideo from './VimeoVideo'
     import StudipIcon from './StudipIcon'
 
     export default {
         name: 'VideoList',
         components: {
+            SharedVideo,
             StudipIcon,
             StudipMessagebox,
-            VideoFile,
             VimeoVideo
         },
         props: {
@@ -79,6 +80,8 @@
 </script>
 
 <style lang="scss">
+    @import "~video.js/src/css/video-js";
+
     .date {
         border: 1px solid #d0d7e3;
         margin-bottom: 10px;
@@ -106,12 +109,17 @@
         & > div {
             display: flex;
             flex-direction: row;
+            flex-wrap: wrap;
         }
 
         .video {
+            -moz-transition: width 300ms ease-in-out, height 300ms ease-in-out;
+            -o-transition: width 300ms ease-in-out, height 300ms ease-in-out;
+            -webkit-transition: width 300ms ease-in-out, height 300ms ease-in-out;
             border: 1px solid #28497c;
             height: 200px;
             margin: 5px;
+            transition: width 300ms ease-in-out, height 300ms ease-in-out;
             width: 250px;
 
             header {
@@ -140,8 +148,8 @@
             }
 
             &.playing {
-                width: 100%;
                 height: auto;
+                width: 100%;
 
                 iframe {
                     height: 100% !important;
@@ -149,7 +157,7 @@
             }
 
             .play-me, .loading, .cannot-play {
-                margin-top: calc(25% - 16px);
+                margin-top: 15px;
                 text-align: center;
 
                 a {
@@ -166,10 +174,19 @@
                 }
             }
 
+            .play-me {
+                margin-top: calc(25% - 15px);
+            }
+
             .loading {
                 font-size: large;
                 line-height: 54px;
                 text-align: center;
+            }
+
+            .cannot-play {
+                font-style: italic;
+                font-size: small;
             }
 
             .video-js {

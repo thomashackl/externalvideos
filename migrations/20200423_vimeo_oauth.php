@@ -60,7 +60,7 @@ class VimeoOAuth extends Migration {
         ]);
         // Callback URL for authentication requests
         Config::get()->create('VIMEO_CALLBACK_URL', [
-            'value' => URLHelper::getLink('plugins.php/externalvideoplugin/vimeo/callback'),
+            'value' => URLHelper::getLink('plugins.php/externalvideos/vimeo/callback'),
             'type' => 'string',
             'range' => 'global',
             'section' => 'externalvideos',

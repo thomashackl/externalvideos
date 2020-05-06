@@ -1,7 +1,7 @@
-pluginname=ExternalVideos
-pluginclassname=ExternalVideoPlugin
+pluginname=Videos aus externen Quellen
+pluginclassname=ExternalVideos
 origin=upa
-version=1.1
+version=1.2
 description=Videos from Vimeo or external cloud shares
 studipMinVersion=4.4.99
 studipMaxVersion=4.9.99

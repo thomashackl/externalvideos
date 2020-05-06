@@ -1,5 +1,7 @@
 <form class="default" id="add-media-file" action="<?php echo $controller->link_for('videos/store_share',
         $video->isNew() ? null : $video->id) ?>" method="post">
+    <?php echo MessageBox::warning(dgettext('videos', 'Achtung: Videos, die Sie hier einbinden, ' .
+        'können von Ihren Teilnehmenden heruntergeladen werden.')) ?>
     <fieldset>
         <legend>
             <?php echo dgettext('videos', 'Grunddaten') ?>

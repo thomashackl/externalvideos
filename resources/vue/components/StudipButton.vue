@@ -1,6 +1,6 @@
 
 <template>
-    <button class="button" :class="[icon]" type="submit" :name="name">{{ label }}</button>
+    <button class="button" :class="[icon]" type="submit" :name="name" :disabled="disabled">{{ label }}</button>
 </template>
 
 <script>
@@ -29,6 +29,10 @@
             preventDefault: {
                 type: Boolean,
                 default: true
+            },
+            disabled: {
+                type: Boolean,
+                default: false
             }
         },
         methods: {

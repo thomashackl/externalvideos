@@ -3,7 +3,7 @@ let VimeoAPI = {
     VERSION_STRING: 'application/vnd.vimeo.*+json; version=3.4',
     USER_AGENT: 'vimeo.php 3.0.5; (http://developer.vimeo.com/api/docs)',
     CONTENT_TYPE: 'application/json',
-    PLUGIN_URL: 'plugins.php/externalvideoplugin',
+    PLUGIN_URL: 'plugins.php/externalvideos',
     prepareUpload: async function(name, description, fileSize) {
 
         // Prepare file upload
@@ -39,18 +39,6 @@ let VimeoAPI = {
 
         // Call upload initialization to get a target URL for the video file
         return fetch(initialize, {
-            method: 'POST',
-            body: formData
-        })
-    },
-    getVideo: async function(videoId) {
-        const action = STUDIP.URLHelper.getURL(this.PLUGIN_URL + '/vimeo/get_video')
-
-        let formData = new FormData()
-        formData.append('video_id', videoId)
-
-        // Call upload initialization to get a target URL for the video file
-        return fetch(action, {
             method: 'POST',
             body: formData
         })

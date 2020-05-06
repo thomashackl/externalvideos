@@ -3,7 +3,7 @@
         <header>
             <div>
                 {{ video.title }}
-                <div class="visibility" v-if="video.visible_from != null || video.visible_until != null">
+                <div class="visibility">
                     <studip-icon shape="visibility-visible" role="info_alt"></studip-icon>
                     <template v-if="video.visible_from != null && video.visible_until == null">
                         ab {{ video.visible_from }}
@@ -14,10 +14,13 @@
                     <template v-if="video.visible_from != null && video.visible_until != null">
                         {{ video.visible_from }} bis {{ video.visible_until }}
                     </template>
+                    <template v-if="video.visible_from == null && video.visible_until == null">
+                        unbegrenzt
+                    </template>
                 </div>
             </div>
             <nav class="actions">
-                <a v-if="sourceChecked" title="Video ausblenden" @click="closeVideo">
+                <a v-if="sourceChecked && !playError" title="Video ausblenden" @click="closeVideo">
                     <studip-icon shape="decline" size="16" role="info_alt"></studip-icon>
                 </a>
                 <template v-if="isLecturer">
@@ -30,12 +33,6 @@
                 </template>
             </nav>
         </header>
-        <div class="video-error" v-if="playError">
-            <a :href="video.url" title="Link öffnen" target="_blank">
-                Kann das Video nicht abgespielt werden?
-                Klicken Sie hier, um den Link in einem Fenster/Tab zu öffnen.
-            </a>
-        </div>
         <div v-if="!sourceChecked && !loading" class="play-me">
             <a @click="getVideoSrc">
                 <studip-icon shape="play" size="48"
@@ -46,11 +43,11 @@
         <div v-if="loading" class="loading">
             Daten werden geladen...
         </div>
-        <div v-if="sourceChecked && options.sources.length == 0" class="cannot-play">
+        <div v-if="(sourceChecked && options.sources.length == 0) || playError" class="cannot-play">
             <a :href="video.url" title="Abspielen" target="_blank">
                 <studip-icon shape="link-extern" size="48"></studip-icon>
                 <div>
-                    Leider kann das Video nicht automatisch angezeigt werden.
+                    Leider kann das Video nicht automatisch abgespielt werden.
                     Klicken Sie hier, um den Link in einem Fenster/Tab zu öffnen.
                 </div>
             </a>
@@ -63,7 +60,7 @@
     import videojs from 'video.js'
 
     export default {
-        name: 'VideoFile',
+        name: 'SharedVideo',
         components: {
             StudipIcon
         },
@@ -129,17 +126,14 @@
         methods: {
             getVideoSrc: function() {
                 this.loading = true
-                console.log('Loading video...')
                 fetch(this.createUrlWithId(this.realSrcUrl)).then((response) => {
                     if (!response.ok) {
                         throw response
                     }
-                    console.log('loaded.')
                     return response.json()
                 }).then((json) => {
                     this.sourceChecked = true
                     if (json != null && json.src != null) {
-                        console.log('Initializing video.js...')
                         let source = {
                             src: json.src,
                             fluid: true
@@ -158,19 +152,17 @@
                         this.$el.appendChild(video)
                         this.player = videojs(video, this.options)
                         this.playing = true
-                        console.log('Playing: ' + this.playing)
                         this.player.on('error', (event) => {
                             this.playError = true
                             this.playing = false
-                            console.log('Error, Playing: ' + this.playing)
+                            this.player = null
+                            this.$el.querySelector('.video-js').remove()
                         })
                     }
                     this.loading = false
                 }).catch((error) => {
                     this.loading = false
                     this.sourceChecked = true
-                    console.log('could not load.')
-                    console.log(error)
                 })
             },
             closeVideo: function() {
@@ -181,6 +173,7 @@
                 }
                 this.sourceChecked = false
                 this.loading = false
+                this.playing = false
             },
             createUrlWithId: function(url, addition) {
                 const parts = url.split('?')

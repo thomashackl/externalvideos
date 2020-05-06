@@ -115,15 +115,4 @@ class VimeoAPI {
         return $vimeo->request('/me/projects/' . $projectId . '/videos/' . $videoId, [], 'PUT');
     }
 
-    public static function getVideo($videoId)
-    {
-        $vimeo = new Vimeo(
-            Config::get()->VIMEO_CLIENT_ID,
-            Config::get()->VIMEO_CLIENT_SECRET,
-            Config::get()->VIMEO_ACCESS_TOKEN
-        );
-
-        return $vimeo->request('/me/videos/' . $videoId);
-    }
-
 }
