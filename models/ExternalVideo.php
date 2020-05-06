@@ -14,7 +14,8 @@
  * @category    Videos
  *
  * @property int video_id database column
- * @property string sharelink database column
+ * @property string type database column
+ * @property string external_id database column
  * @property string url database column
  * @property string title database column
  * @property int position database column
@@ -70,7 +71,7 @@ class ExternalVideo extends SimpleORMap
                 OR `visible_from` IS NULL AND `visible_until` >= NOW()
                 OR NOW() BETWEEN `visible_from` AND `visible_until`
             )
-            ORDER BY `position`",
+            ORDER BY `position`, `title`",
             ['course' => $course_id]);
     }
 
@@ -92,16 +93,23 @@ class ExternalVideo extends SimpleORMap
         }
     }
 
+    /**
+     * Helper method for finding the actual video source file
+     * contained in a cloud share link. This method makes
+     * heavy use of the Puppeteer library for parsing websites.
+     *
+     * @return array|null
+     */
     public function getVideoSource()
     {
         $cache = StudipCacheFactory::getCache();
         $cache_lifetime = null;
 
-        //if ($cached = $cache->read($this->url)) {
+        if ($cached = $cache->read('external-video-' . $this->url)) {
 
-        //    return $cached;
+            return $cached;
 
-        //} else {
+        } else {
 
             // Sync & Share (Powerfolder)
             if (mb_strpos($this->url, '/getlink/') !== false) {
@@ -233,11 +241,11 @@ class ExternalVideo extends SimpleORMap
 
             // Cache the direct video link.
             if ($cache_lifetime != null) {
-                $cache->write($this->url, $data, $cache_lifetime);
+                $cache->write('external-video-' . $this->url, $data, $cache_lifetime);
             }
 
             return $data;
-        //}
+        }
     }
 
 }

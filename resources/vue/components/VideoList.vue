@@ -12,10 +12,14 @@
                     </a>
                 </h1>
             </header>
-            <template v-if="openDates.includes(date.id)">
-                <video-file v-for="video in date.videos" :key="video.id" :video="video"
-                            :get-src-url="getVideoSrcUrl" :edit-url="editUrl" :delete-url="deleteUrl"></video-file>
-            </template>
+            <div v-if="openDates.includes(date.id)">
+                <template v-for="video in date.videos">
+                    <video-file v-if="video.type == 'share'" :key="video.id" :video="video"
+                                :get-src-url="getVideoSrcUrl" :edit-url="editUrl" :delete-url="deleteUrl"></video-file>
+                    <vimeo-video v-if="video.type == 'vimeo'" :key="video.id" :video="video"
+                                 :edit-url="editUrl" :delete-url="deleteUrl"></vimeo-video>
+                </template>
+            </div>
         </section>
     </div>
 </template>
@@ -23,6 +27,7 @@
 <script>
     import StudipMessagebox from './StudipMessagebox'
     import VideoFile from './VideoFile'
+    import VimeoVideo from './VimeoVideo'
     import StudipIcon from './StudipIcon'
 
     export default {
@@ -30,7 +35,8 @@
         components: {
             StudipIcon,
             StudipMessagebox,
-            VideoFile
+            VideoFile,
+            VimeoVideo
         },
         props: {
             dates: {
@@ -94,6 +100,81 @@
                         vertical-align: bottom;
                     }
                 }
+            }
+        }
+
+        & > div {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .video {
+            border: 1px solid #28497c;
+            height: 200px;
+            margin: 5px;
+            width: 250px;
+
+            header {
+                background-color: #28497c;
+                color: white;
+                display: flex;
+                flex-direction: row;
+                padding: 5px;
+
+                div {
+                    flex: 1;
+
+                    div.visibility {
+                        font-style: italic;
+                        font-size: smaller;
+
+                        img, svg {
+                            vertical-align: bottom;
+                        }
+                    }
+                }
+            }
+
+            iframe {
+                height: unset !important;
+            }
+
+            &.playing {
+                width: 100%;
+                height: auto;
+
+                iframe {
+                    height: 100% !important;
+                }
+            }
+
+            .play-me, .loading, .cannot-play {
+                margin-top: calc(25% - 16px);
+                text-align: center;
+
+                a {
+                    cursor: pointer;
+
+                    img, svg {
+                        vertical-align: bottom;
+                    }
+
+                    div {
+                        display: inline-block;
+                        margin-bottom: 13px;
+                    }
+                }
+            }
+
+            .loading {
+                font-size: large;
+                line-height: 54px;
+                text-align: center;
+            }
+
+            .video-js {
+                max-width: calc(100% - 10px);
+                margin: 5px;
             }
         }
     }

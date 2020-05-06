@@ -14,7 +14,7 @@
  * @category    Videos
  */
 
-class ExternalVideoPlugin extends StudIPPlugin implements StandardPlugin {
+class ExternalVideoPlugin extends StudIPPlugin implements StandardPlugin, SystemPlugin {
 
     public function __construct() {
         parent::__construct();
@@ -23,6 +23,12 @@ class ExternalVideoPlugin extends StudIPPlugin implements StandardPlugin {
 
         // Localization
         bindtextdomain('videos', realpath(__DIR__.'/locale'));
+
+        if ($GLOBALS['perm']->have_perm('root')) {
+            $navigation = new Navigation(dgettext('videos', 'OAuth-Authentifizierung bei Vimeo'),
+                PluginEngine::getURL($this, [], 'vimeo'));
+            Navigation::addItem('/admin/locations/vimeo', $navigation);
+        }
     }
 
     /**

@@ -1,4 +1,4 @@
-<form class="default" id="add-media-file" action="<?php echo $controller->link_for('videos/store',
+<form class="default" id="add-media-file" action="<?php echo $controller->link_for('videos/store_share',
         $video->isNew() ? null : $video->id) ?>" method="post">
     <fieldset>
         <legend>

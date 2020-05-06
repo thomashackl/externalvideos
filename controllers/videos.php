@@ -39,16 +39,15 @@ class VideosController extends AuthenticatedController {
      */
     public function index_action()
     {
-        SimpleORMap::expireTableScheme();
         // Navigation handling.
         Navigation::activateItem('/course/videos/videos');
 
         PageLayout::setTitle(Context::getHeaderLine() . ' - ' . dgettext('videos', 'Medien'));
         PageLayout::addScript($this->plugin->getPluginURL() . '/assets/javascripts/externalvideos.js');
 
-        $videos = $GLOBALS['perm']->have_studip_perm('dozent', $this->course->id) ?
+        $videos = SimpleCollection::createFromArray($GLOBALS['perm']->have_studip_perm('dozent', $this->course->id) ?
                 ExternalVideo::findByCourse_id($this->course->id) :
-                ExternalVideo::findByCourseAndVisibility($this->course->id);
+                ExternalVideo::findByCourseAndVisibility($this->course->id))->orderBy('position, title');
 
         $this->assigned_dates = [];
         foreach ($videos as $video) {
@@ -66,6 +65,8 @@ class VideosController extends AuthenticatedController {
 
                 $this->assigned_dates[$date->date_id]['videos'][] = [
                     'id' => $video->id,
+                    'type' => $video->type,
+                    'externalId' => $video->external_id,
                     'url' => $video->url,
                     'title' => $video->title,
                     'visible_from' => $video->visible_from != null ? $video->visible_from->format('d.m.Y H:i') : null,
@@ -84,6 +85,8 @@ class VideosController extends AuthenticatedController {
 
                 $this->assigned_dates['']['videos'][] = [
                     'id' => $video->id,
+                    'type' => $video->type,
+                    'externalId' => $video->external_id,
                     'url' => $video->url,
                     'title' => $video->title,
                     'visible_from' => $video->visible_from != null ? $video->visible_from->format('d.m.Y H:i') : null,
@@ -98,9 +101,12 @@ class VideosController extends AuthenticatedController {
         if ($GLOBALS['perm']->have_studip_perm('dozent', $this->course->id)) {
             $sidebar = Sidebar::get();
             $actions = new ActionsWidget();
+            $actions->addLink(dgettext('videos', 'Video für Vimeo hochladen'),
+                $this->link_for('videos/edit_vimeo'),
+                Icon::create('video+add'));
             $actions->addLink(dgettext('videos', 'Video über Freigabelink hinzufügen'),
                 $this->link_for('videos/edit_share'),
-                Icon::create('add'))->asDialog('size="auto"');
+                Icon::create('link-extern+add'))->asDialog('size="auto"');
             $sidebar->addWidget($actions);
         }
     }
@@ -139,14 +145,79 @@ class VideosController extends AuthenticatedController {
         }
     }
 
+    /**
+     * Create or edit a video for Vimeo
+     *
+     * @param int $id the video to edit
+     */
+    public function edit_vimeo_action($id = 0)
+    {
+        if (!$GLOBALS['perm']->have_studip_perm('dozent', $this->course->id)) {
+            throw new AccessDeniedException();
+        }
+
+        PageLayout::addScript($this->plugin->getPluginURL() . '/assets/javascripts/vimeo-upload.js');
+
+        $videos = Navigation::getItem('/course/videos');
+        $videos->addSubNavigation('vimeo', new Navigation($id == 0 ?
+            dgettext('videos', 'Video für Vimeo hochladen') :
+            dgettext('videos', 'Vimeo-Video bearbeiten'),
+            $this->link_for('videos/edit_vimeo')));
+        Navigation::activateItem('/course/videos/vimeo');
+
+        if ($id != 0) {
+            $video = ExternalVideo::find($id);
+        } else {
+            $video = new ExternalVideo();
+        }
+
+        if (count($video->dates) > 0) {
+            $this->selected_dates = $video->dates->pluck('date_id');
+        } else {
+            $this->selected_dates = [];
+        }
+
+        $this->video = [
+            'id' => $video->id,
+            'type' => 'vimeo',
+            'external_id' => $video->external_id,
+            'url' => $video->url,
+            'title' => $video->title,
+            'visible_from' => $video->visible_from ? $video->visible_from->format('d.m.Y H:i') : null,
+            'visible_until' => $video->visible_until ? $video->visible_until->format('d.m.Y H:i') : null
+        ];
+
+        $this->dates = [];
+        foreach ($this->course->dates as $date) {
+            $name = date('d.m.Y H:i', $date->date) . ' - ' .
+                date('H:i', $date->end_time);
+            if ($room = $date->getRoomName()) {
+                $name .= ' (' . $room . ')';
+            }
+
+            $this->dates[$date->id] = $name;
+        }
+    }
+
+    /**
+     * Store video data.
+     *
+     * @param int $id
+     * @throws Exception
+     */
     public function store_share_action($id = 0)
     {
+        if (!$GLOBALS['perm']->have_studip_perm('dozent', $this->course->id)) {
+            throw new AccessDeniedException();
+        }
+
         CSRFProtection::verifyUnsafeRequest();
 
         if ($id != 0) {
             $video = ExternalVideo::find($id);
         } else {
             $video = new ExternalVideo();
+            $video->type = 'share';
             $video->mkdate = date('Y-m-d H:i:s');
         }
         $video->course_id = $this->course->id;
@@ -190,6 +261,72 @@ class VideosController extends AuthenticatedController {
         $this->relocate('videos');
     }
 
+    /**
+     * Store Vimeo video data.
+     *
+     * @param int $id
+     * @throws Exception
+     */
+    public function store_vimeo_action($id = 0)
+    {
+        if (!$GLOBALS['perm']->have_studip_perm('dozent', $this->course->id)) {
+            throw new AccessDeniedException();
+        }
+
+        if ($id != 0) {
+            $video = ExternalVideo::find($id);
+        } else {
+            $video = new ExternalVideo();
+            $video->type = 'vimeo';
+            $video->mkdate = date('Y-m-d H:i:s');
+        }
+        $video->course_id = $this->course->id;
+        $video->user_id = $GLOBALS['user']->id;
+        $video->title = Request::get('name');
+        $video->external_id = Request::get('external_id');
+        $video->url = Request::get('url');
+
+        $video->visible_from = Request::get('visible_from') ? new DateTime(Request::get('visible_from')) : null;
+        $video->visible_until = Request::get('visible_until') ? new DateTime(Request::get('visible_until')) : null;
+
+        $video->chdate = date('Y-m-d H:i:s');
+
+        $newDates = new SimpleCollection();
+        foreach (Request::getArray('dates') as $date) {
+            if ($date != '') {
+                $found = null;
+                if (!$video->isNew()) {
+                    $found = $video->dates->findOneBy('date_id', $date);
+                }
+                if ($found) {
+                    $newDates->append($found);
+                } else {
+                    $assign = new ExternalVideoDate();
+                    $assign->date_id = $date;
+                    $assign->mkdate = date('Y-m-d H:i:s');
+                    $newDates->append($assign);
+                }
+            }
+        }
+
+        $video->dates = $newDates;
+
+        if ($video->store()) {
+            PageLayout::postSuccess(
+                dgettext('videos','Das Video wurde gespeichert.'));
+        } else {
+            PageLayout::postError(
+                dgettext('videos','Das Video konnte nicht gespeichert werden.'));
+        }
+
+        $this->relocate('videos');
+    }
+
+    /**
+     * Delete the given video.
+     *
+     * @param int $id
+     */
     public function delete_action($id = 0) {
         if (!$GLOBALS['perm']->have_studip_perm('dozent', $this->course->id)) {
             throw new AccessDeniedException();
@@ -199,15 +336,20 @@ class VideosController extends AuthenticatedController {
 
         if ($video->delete()) {
             PageLayout::postSuccess(
-                dgettext('videos','Das Medium wurde gelöscht.'));
+                dgettext('videos','Das Video wurde gelöscht.'));
         } else {
             PageLayout::postError(
-                dgettext('videos','Das Medium konnte nicht gelöscht werden.'));
+                dgettext('videos','Das Video konnte nicht gelöscht werden.'));
         }
 
         $this->relocate('videos');
     }
 
+    /**
+     * Get source file URL for external video.
+     *
+     * @param $id
+     */
     public function get_src_action($id)
     {
         $video = ExternalVideo::find($id);

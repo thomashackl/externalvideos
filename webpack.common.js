@@ -8,7 +8,8 @@ const assetsPath = path.resolve(__dirname, 'resources/assets');
 
 module.exports = {
     entry: {
-        "externalvideos": assetsPath + "/javascripts/entry-videos.js"
+        "externalvideos": assetsPath + "/javascripts/entry-videos.js",
+        "vimeo-upload": assetsPath + "/javascripts/entry-upload.js",
     },
     output: {
         path: path.resolve(__dirname, 'assets'),

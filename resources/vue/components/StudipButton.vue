@@ -1,12 +1,13 @@
 
 <template>
-    <button class="button" :class="[icon]" type="submit" :name="name" @click="onClick">{{ label }}</button>
+    <button class="button" :class="[icon]" type="submit" :name="name">{{ label }}</button>
 </template>
 
 <script>
     import bus from 'jsassets/bus'
 
     export default {
+        name: 'StudipButton',
         props: {
             name: {
                 type: String,

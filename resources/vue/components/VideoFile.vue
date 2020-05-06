@@ -1,18 +1,21 @@
 <template>
-    <section class="video" :id="'video-' + video.id">
+    <section class="video" :id="'video-' + video.id" :class="[playing ? 'playing' : '']">
         <header>
-            {{ video.title }}
-            <template v-if="video.visible_from != null || video.visible_until != null">
-                <template v-if="video.visible_from != null && video.visible_until == null">
-                    (sichtbar ab {{ video.visible_from }})
-                </template>
-                <template v-if="video.visible_from == null && video.visible_until != null">
-                    (sichtbar bis {{ video.visible_until }})
-                </template>
-                <template v-if="video.visible_from != null && video.visible_until != null">
-                    (sichtbar von {{ video.visible_from }} bis {{ video.visible_until }})
-                </template>
-            </template>
+            <div>
+                {{ video.title }}
+                <div class="visibility" v-if="video.visible_from != null || video.visible_until != null">
+                    <studip-icon shape="visibility-visible" role="info_alt"></studip-icon>
+                    <template v-if="video.visible_from != null && video.visible_until == null">
+                        ab {{ video.visible_from }}
+                    </template>
+                    <template v-if="video.visible_from == null && video.visible_until != null">
+                        bis {{ video.visible_until }}
+                    </template>
+                    <template v-if="video.visible_from != null && video.visible_until != null">
+                        {{ video.visible_from }} bis {{ video.visible_until }}
+                    </template>
+                </div>
+            </div>
             <nav class="actions">
                 <a v-if="sourceChecked" title="Video ausblenden" @click="closeVideo">
                     <studip-icon shape="decline" size="16" role="info_alt"></studip-icon>
@@ -91,28 +94,28 @@
                 },
                 loading: false,
                 sourceChecked: false,
-                played: false,
+                playing: false,
                 playError: false
             }
         },
         computed: {
             realSrcUrl: function() {
                 if (this.getSrcUrl != null) {
-                    return this.createUrlWithId(this.getSrcUrl)
+                    return this.createUrlWithId(this.getSrcUrl, '')
                 } else {
                     return null
                 }
             },
             realEditUrl: function() {
                 if (this.editUrl != null) {
-                    return this.createUrlWithId(this.editUrl)
+                    return this.createUrlWithId(this.editUrl, this.video.type)
                 } else {
                     return null
                 }
             },
             realDeleteUrl: function() {
                 if (this.deleteUrl != null) {
-                    return this.createUrlWithId(this.deleteUrl)
+                    return this.createUrlWithId(this.deleteUrl, '')
                 } else {
                     return null
                 }
@@ -126,14 +129,17 @@
         methods: {
             getVideoSrc: function() {
                 this.loading = true
+                console.log('Loading video...')
                 fetch(this.createUrlWithId(this.realSrcUrl)).then((response) => {
                     if (!response.ok) {
                         throw response
                     }
+                    console.log('loaded.')
                     return response.json()
                 }).then((json) => {
                     this.sourceChecked = true
                     if (json != null && json.src != null) {
+                        console.log('Initializing video.js...')
                         let source = {
                             src: json.src,
                             fluid: true
@@ -150,19 +156,21 @@
                             video.setAttribute('type', json.type)
                         }
                         this.$el.appendChild(video)
-                        this.$el.querySelector('.play-me').style.display = 'none'
                         this.player = videojs(video, this.options)
-                        this.player.on('play', (event) => {
-                            this.played = true
-                        })
+                        this.playing = true
+                        console.log('Playing: ' + this.playing)
                         this.player.on('error', (event) => {
                             this.playError = true
+                            this.playing = false
+                            console.log('Error, Playing: ' + this.playing)
                         })
                     }
                     this.loading = false
                 }).catch((error) => {
                     this.loading = false
                     this.sourceChecked = true
+                    console.log('could not load.')
+                    console.log(error)
                 })
             },
             closeVideo: function() {
@@ -174,9 +182,13 @@
                 this.sourceChecked = false
                 this.loading = false
             },
-            createUrlWithId: function(url) {
+            createUrlWithId: function(url, addition) {
                 const parts = url.split('?')
-                let fullUrl = parts[0] + '/' + this.video.id
+                let fullUrl = parts[0]
+                if (addition != '') {
+                    fullUrl += '_' + addition
+                }
+                fullUrl += '/' + this.video.id
                 if (parts.length > 1) {
                     fullUrl += '?' + parts[1]
                 }
@@ -185,53 +197,3 @@
         }
     }
 </script>
-
-<style lang="scss">
-    .date {
-        .video {
-            border: 1px solid #28497c;
-            margin: 5px;
-
-            header {
-                background-color: #28497c;
-                color: white;
-                padding: 5px;
-
-                nav {
-                    float: right;
-                }
-            }
-
-            .play-me, .loading, .cannot-play {
-                height: 54px;
-                vertical-align: center;
-
-                a {
-                    cursor: pointer;
-
-                    img, svg {
-                        vertical-align: bottom;
-                    }
-
-                    div {
-                        display: inline-block;
-                        margin-bottom: 13px;
-                    }
-                }
-            }
-
-            .loading {
-                font-size: large;
-                line-height: 54px;
-                text-align: center;
-            }
-
-            .video-js {
-                height: unset !important;
-                width: unset !important;
-                max-width: calc(100% - 10px);
-                margin: 5px;
-            }
-        }
-    }
-</style>
