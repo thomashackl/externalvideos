@@ -11,7 +11,7 @@
         </fieldset>
         <fieldset v-if="video.id">
             <legend>
-                <span class="required">Link zum Video in Vimeo</span>
+                Link zum Video in Vimeo
             </legend>
             <section>
                 {{ video.url }}
