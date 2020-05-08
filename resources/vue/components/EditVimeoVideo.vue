@@ -1,5 +1,6 @@
 <template>
-    <form class="default" ref="form" :action="storeUrl" method="post" @submit.prevent="uploadVideo">
+    <form class="default" ref="form" :action="createUrlWithId(storeUrl, '')" method="post"
+          @submit.prevent="uploadVideo">
         <fieldset v-if="!video.id">
             <legend>
                 <span class="required">Videodatei</span>
@@ -64,7 +65,7 @@
         </fieldset>
         <footer data-dialog-button>
             <studip-button name="store" class="accept" label="Speichern" :prevent-default="false"
-                           :disabled="title == '' || (video.id || files.length == 0)"></studip-button>
+                           :disabled="title == '' || (!video.id && files.length == 0)"></studip-button>
             <studip-link-button name="cancel" class="cancel" label="Abbrechen" :href="overviewUrl"></studip-link-button>
         </footer>
     </form>
@@ -154,6 +155,20 @@
                         console.log('Upload failed, Video ID is ' + videoId.id + '.')
                     })
                 }
+            },
+            createUrlWithId: function(url, addition) {
+                const parts = url.split('?')
+                let fullUrl = parts[0]
+                if (addition != '') {
+                    fullUrl += '_' + addition
+                }
+                if (this.video.id) {
+                    fullUrl += '/' + this.video.id
+                }
+                if (parts.length > 1) {
+                    fullUrl += '?' + parts[1]
+                }
+                return fullUrl
             }
         }
     }

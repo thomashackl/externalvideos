@@ -1,5 +1,5 @@
 <template>
-    <section class="video" :id="'video-' + video.id" :class="[playing ? 'playing' : '']">
+    <section class="video" :id="'video-' + video.id" :class="[playing ? 'playing' : '', video.visible ? '' : 'hidden']">
         <header>
             <div>
                 {{ video.title }}
@@ -16,6 +16,9 @@
                     </template>
                     <template v-if="video.visible_from == null && video.visible_until == null">
                         unbegrenzt
+                    </template>
+                    <template v-if="!video.visible">
+                        (wird nicht angezeigt)
                     </template>
                 </div>
             </div>

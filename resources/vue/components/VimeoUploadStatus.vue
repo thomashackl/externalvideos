@@ -128,8 +128,8 @@
     article {
         background-color: #ffffff;
         box-shadow: 2px 2px 10px #000000;
-        position: absolute;
         left: 25%;
+        position: absolute;
         top: calc(50% - 100px);
         width: 50%;
         z-index: 9999;
@@ -149,7 +149,7 @@
 
         div {
             font-weight: normal !important;
-            margin: 10px;
+            margin: 10px !important;
 
             progress {
                 background-color: #28497c;

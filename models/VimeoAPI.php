@@ -115,4 +115,37 @@ class VimeoAPI {
         return $vimeo->request('/me/projects/' . $projectId . '/videos/' . $videoId, [], 'PUT');
     }
 
+    public static function getOEmbed($url)
+    {
+        $params = [
+            'url' => $url
+        ];
+
+        $query = http_build_query($params);
+        $target = 'https://vimeo.com/api/oembed.json?' . $query;
+
+        $curl = curl_init();
+
+        curl_setopt_array($curl, [
+            CURLOPT_URL => $target,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'GET'
+        ]);
+
+        $response = json_decode(curl_exec($curl));
+        $error = curl_error($curl);
+        $statuscode = curl_getinfo($curl, CURLINFO_RESPONSE_CODE);
+
+        curl_close($curl);
+
+        return [
+            'response' => $response,
+            'statuscode' => $statuscode
+        ];
+    }
+
 }

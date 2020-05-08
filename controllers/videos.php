@@ -69,8 +69,11 @@ class VideosController extends AuthenticatedController {
                     'externalId' => $video->external_id,
                     'url' => $video->url,
                     'title' => $video->title,
-                    'visible_from' => $video->visible_from != null ? $video->visible_from->format('d.m.y H:i') : null,
-                    'visible_until' => $video->visible_until != null ? $video->visible_until->format('d.m.y H:i') : null
+                    'visible_from' => $video->visible_from != null ?
+                        $video->visible_from->format('d.m.y H:i') : null,
+                    'visible_until' => $video->visible_until != null ?
+                        $video->visible_until->format('d.m.y H:i') : null,
+                    'visible' => $video->isVisible()
                 ];
 
             } else {
@@ -89,8 +92,11 @@ class VideosController extends AuthenticatedController {
                     'externalId' => $video->external_id,
                     'url' => $video->url,
                     'title' => $video->title,
-                    'visible_from' => $video->visible_from != null ? $video->visible_from->format('d.m.y H:i') : null,
-                    'visible_until' => $video->visible_until != null ? $video->visible_until->format('d.m.y H:i') : null
+                    'visible_from' => $video->visible_from != null ?
+                        $video->visible_from->format('d.m.y H:i') : null,
+                    'visible_until' => $video->visible_until != null ?
+                        $video->visible_until->format('d.m.y H:i') : null,
+                    'visible' => $video->isVisible()
                 ];
 
             }
@@ -104,6 +110,10 @@ class VideosController extends AuthenticatedController {
             $actions->addLink(dgettext('videos', 'Video für Vimeo hochladen'),
                 $this->link_for('videos/edit_vimeo'),
                 Icon::create('video+add'));
+            $actions->addLink(dgettext('videos', 'Videolink aus Vimeo importieren'),
+                $this->link_for('videos/import_vimeo'),
+                Icon::create('video+export'),
+                ['data-dialog' => 'size=auto']);
             $actions->addLink(dgettext('videos', 'Video über Freigabelink hinzufügen'),
                 $this->link_for('videos/edit_share'),
                 Icon::create('link-extern+add'))->asDialog('size="auto"');
@@ -132,60 +142,6 @@ class VideosController extends AuthenticatedController {
         } else {
             $this->selected_dates = [];
         }
-
-        $this->dates = [];
-        foreach ($this->course->dates as $date) {
-            $name = date('d.m.Y H:i', $date->date) . ' - ' .
-                date('H:i', $date->end_time);
-            if ($room = $date->getRoomName()) {
-                $name .= ' (' . $room . ')';
-            }
-
-            $this->dates[$date->id] = $name;
-        }
-    }
-
-    /**
-     * Create or edit a video for Vimeo
-     *
-     * @param int $id the video to edit
-     */
-    public function edit_vimeo_action($id = 0)
-    {
-        if (!$GLOBALS['perm']->have_studip_perm('dozent', $this->course->id)) {
-            throw new AccessDeniedException();
-        }
-
-        PageLayout::addScript($this->plugin->getPluginURL() . '/assets/javascripts/vimeo-upload.js');
-
-        $videos = Navigation::getItem('/course/videos');
-        $videos->addSubNavigation('vimeo', new Navigation($id == 0 ?
-            dgettext('videos', 'Video für Vimeo hochladen') :
-            dgettext('videos', 'Vimeo-Video bearbeiten'),
-            $this->link_for('videos/edit_vimeo')));
-        Navigation::activateItem('/course/videos/vimeo');
-
-        if ($id != 0) {
-            $video = ExternalVideo::find($id);
-        } else {
-            $video = new ExternalVideo();
-        }
-
-        if (count($video->dates) > 0) {
-            $this->selected_dates = $video->dates->pluck('date_id');
-        } else {
-            $this->selected_dates = [];
-        }
-
-        $this->video = [
-            'id' => $video->id,
-            'type' => 'vimeo',
-            'external_id' => $video->external_id,
-            'url' => $video->url,
-            'title' => $video->title,
-            'visible_from' => $video->visible_from ? $video->visible_from->format('d.m.Y H:i') : null,
-            'visible_until' => $video->visible_until ? $video->visible_until->format('d.m.Y H:i') : null
-        ];
 
         $this->dates = [];
         foreach ($this->course->dates as $date) {
@@ -262,6 +218,63 @@ class VideosController extends AuthenticatedController {
     }
 
     /**
+     * Create or edit a video for Vimeo
+     *
+     * @param int $id the video to edit
+     */
+    public function edit_vimeo_action($id = 0)
+    {
+        if (!$GLOBALS['perm']->have_studip_perm('dozent', $this->course->id)) {
+            throw new AccessDeniedException();
+        }
+
+        PageLayout::addScript($this->plugin->getPluginURL() . '/assets/javascripts/vimeo-upload.js');
+
+        $videos = Navigation::getItem('/course/videos');
+        $videos->addSubNavigation('vimeo', new Navigation($id == 0 ?
+            dgettext('videos', 'Video für Vimeo hochladen') :
+            dgettext('videos', 'Vimeo-Video bearbeiten'),
+            $this->link_for('videos/edit_vimeo')));
+        Navigation::activateItem('/course/videos/vimeo');
+
+        if ($id != 0) {
+            $video = ExternalVideo::find($id);
+        } else {
+            $video = new ExternalVideo();
+        }
+
+        if (count($video->dates) > 0) {
+            $this->selected_dates = $video->dates->pluck('date_id');
+        } else {
+            $this->selected_dates = [];
+        }
+
+        $this->video = [
+            'id' => $video->id,
+            'type' => 'vimeo',
+            'external_id' => $video->external_id,
+            'url' => $video->url,
+            'title' => $video->title,
+            'visible_from' => $video->visible_from ? $video->visible_from->format('d.m.Y H:i') : null,
+            'visible_until' => $video->visible_until ? $video->visible_until->format('d.m.Y H:i') : null
+        ];
+
+        $this->dates = [];
+        foreach ($this->course->dates as $date) {
+            $name = date('d.m.Y H:i', $date->date) . ' - ' .
+                date('H:i', $date->end_time);
+            if ($room = $date->getRoomName()) {
+                $name .= ' (' . $room . ')';
+            }
+
+            $this->dates[] = [
+                'id' => $date->id,
+                'name' => $name
+            ];
+        }
+    }
+
+    /**
      * Store Vimeo video data.
      *
      * @param int $id
@@ -278,13 +291,13 @@ class VideosController extends AuthenticatedController {
         } else {
             $video = new ExternalVideo();
             $video->type = 'vimeo';
+            $video->url = Request::get('url');
+            $video->external_id = Request::get('external_id');
+            $video->course_id = $this->course->id;
+            $video->user_id = $GLOBALS['user']->id;
             $video->mkdate = date('Y-m-d H:i:s');
         }
-        $video->course_id = $this->course->id;
-        $video->user_id = $GLOBALS['user']->id;
         $video->title = Request::get('title');
-        $video->external_id = Request::get('external_id');
-        $video->url = Request::get('url');
 
         $video->visible_from = Request::get('visible_from') ? new DateTime(Request::get('visible_from')) : null;
         $video->visible_until = Request::get('visible_until') ? new DateTime(Request::get('visible_until')) : null;
@@ -317,6 +330,106 @@ class VideosController extends AuthenticatedController {
         } else {
             PageLayout::postError(
                 dgettext('videos','Das Video konnte nicht gespeichert werden.'));
+        }
+
+        $this->relocate('videos');
+    }
+
+    /**
+     * Import a video from Vimeo via private link
+     */
+    public function import_vimeo_action()
+    {
+        if (!$GLOBALS['perm']->have_studip_perm('dozent', $this->course->id)) {
+            throw new AccessDeniedException();
+        }
+
+        PageLayout::setTitle(dgettext('videos', 'Video aus Vimeo importieren'));
+
+        $this->selected_dates = [];
+
+        $this->dates = [];
+        foreach ($this->course->dates as $date) {
+            $name = date('d.m.Y H:i', $date->date) . ' - ' .
+                date('H:i', $date->end_time);
+            if ($room = $date->getRoomName()) {
+                $name .= ' (' . $room . ')';
+            }
+
+            $this->dates[$date->id] = $name;
+        }
+    }
+
+    public function do_import_vimeo_action()
+    {
+        if (!$GLOBALS['perm']->have_studip_perm('dozent', $this->course->id)) {
+            throw new AccessDeniedException();
+        }
+
+        CSRFProtection::verifyUnsafeRequest();
+
+        // Check if video is available via the given link.
+        $metadata = VimeoAPI::getOEmbed(Request::get('url'));
+        // Video was found...
+        if ($metadata['statuscode'] == 200) {
+
+            // Check if video isn't already present in current course.
+            $found = ExternalVideo::countBySQL("`external_id` = :video AND `course_id` = :course",
+                ['video' => $metadata['response']->video_id, 'course' => $this->course->id]);
+
+            // Video is not linked in current course, create new database entry.
+            if ($found == 0) {
+                $video = new ExternalVideo();
+                $video->type = 'vimeo';
+                $video->course_id = $this->course->id;
+                $video->user_id = $GLOBALS['user']->id;
+                $video->title = $metadata['response']->title ?: dgettext('videos', 'Ohne Titel');
+                $video->external_id = $metadata['response']->video_id;
+                $video->url = Request::get('url');
+
+                $video->visible_from = Request::get('visible_from') ?
+                    new DateTime(Request::get('visible_from')) : null;
+                $video->visible_until = Request::get('visible_until') ?
+                    new DateTime(Request::get('visible_until')) : null;
+
+                $video->mkdate = date('Y-m-d H:i:s');
+                $video->chdate = date('Y-m-d H:i:s');
+
+                $newDates = new SimpleCollection();
+                foreach (Request::getArray('dates') as $date) {
+                    if ($date != '') {
+                        $found = null;
+                        if (!$video->isNew()) {
+                            $found = $video->dates->findOneBy('date_id', $date);
+                        }
+                        if ($found) {
+                            $newDates->append($found);
+                        } else {
+                            $assign = new ExternalVideoDate();
+                            $assign->date_id = $date;
+                            $assign->mkdate = date('Y-m-d H:i:s');
+                            $newDates->append($assign);
+                        }
+                    }
+                }
+
+                $video->dates = $newDates;
+
+                if ($video->store()) {
+                    PageLayout::postSuccess(
+                        dgettext('videos', 'Das Video wurde gespeichert.'));
+                } else {
+                    PageLayout::postError(
+                        dgettext('videos', 'Das Video konnte nicht gespeichert werden.'));
+                }
+            } else {
+                PageLayout::postWarning(dgettext('videos',
+                    'Das gewünschte Video ist bereits in der aktuellen Veranstaltung eingebunden.'));
+            }
+        } else {
+            PageLayout::postWarning(dgettext('videos',
+                'Es ist ein Fehler aufgetreten. Das gewünschte Video kann nicht in die aktuelle '.
+                'Veranstaltung eingebunden werden.'));
         }
 
         $this->relocate('videos');

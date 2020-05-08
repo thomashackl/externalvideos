@@ -1,6 +1,6 @@
 <template>
-    <section class="video" :id="'video-' + video.id" :class="[playing ? 'playing' : '']">
-        <header>
+    <section class="video" :id="'video-' + video.id" :class="[playing ? 'playing' : '', video.visible ? '' : 'hidden']">
+        <header ref="header">
             <div>
                 {{ video.title }}
                 <div class="visibility">
@@ -17,6 +17,9 @@
                     <template v-if="video.visible_from == null && video.visible_until == null">
                         unbegrenzt
                     </template>
+                    <template v-if="!video.visible">
+                        (wird nicht angezeigt)
+                    </template>
                 </div>
             </div>
             <nav class="actions">
@@ -27,13 +30,14 @@
                     <a :href="realEditUrl" title="Bearbeiten">
                         <studip-icon shape="edit" size="16" role="info_alt"></studip-icon>
                     </a>
-                    <a :href="realDeleteUrl" title="Löschen" data-confirm="Wollen Sie das Video wirklich löschen?">
+                    <a :href="realDeleteUrl" title="Löschen"
+                       data-confirm="Wollen Sie das Video wirklich löschen? Es wird nur aus Stud.IP, aber nicht auf Vimeo gelöscht.">
                         <studip-icon shape="trash" size="16" role="info_alt"></studip-icon>
                     </a>
                 </template>
             </nav>
         </header>
-        <div :id="'vimeo-video-' + video.id" :class="playError ? 'cannot-play' : ''">
+        <div :id="'vimeo-video-' + video.id" ref="playerContainer" :class="playError ? 'cannot-play' : ''">
             <studip-icon v-if="playError" shape="decline" role="info" width="32" height="32"></studip-icon>
             <div v-if="playError">
                 Das Video wurde nicht auf Vimeo gefunden. Möglicherweise

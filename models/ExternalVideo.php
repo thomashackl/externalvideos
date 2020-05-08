@@ -76,6 +76,19 @@ class ExternalVideo extends SimpleORMap
     }
 
     /**
+     * Checks if the current video is visible for course participants now.
+     */
+    public function isVisible()
+    {
+        $start = $this->visible_from ?: new DateTime('01.01.1970 00:00:00');
+        $end = $this->visible_until ?: new DateTime('31.12.2099 23:59:59');
+
+        $now = new DateTime();
+
+        return $now >= $start && $now <= $end;
+    }
+
+    /**
      * Visibilities are stored as strings to database (YYYY-MM-DD HH:ii:ss).
      * Internally, the model class uses DateTime objects for better handling.
      *

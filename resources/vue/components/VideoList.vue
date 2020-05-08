@@ -117,10 +117,10 @@
             -o-transition: width 300ms ease-in-out, height 300ms ease-in-out;
             -webkit-transition: width 300ms ease-in-out, height 300ms ease-in-out;
             border: 1px solid #28497c;
-            height: 200px;
+            height: 250px;
             margin: 5px;
             transition: width 300ms ease-in-out, height 300ms ease-in-out;
-            width: 250px;
+            width: 300px;
 
             header {
                 background-color: #28497c;
@@ -192,6 +192,14 @@
             .video-js {
                 max-width: calc(100% - 10px);
                 margin: 5px;
+            }
+
+            &.hidden {
+                border-color: mix(#28497c, #ffffff, 40%);
+
+                header {
+                    background-color: mix(#28497c, #ffffff, 40%);
+                }
             }
         }
     }
