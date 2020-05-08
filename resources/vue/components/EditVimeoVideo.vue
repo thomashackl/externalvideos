@@ -9,6 +9,14 @@
                 <input type="file" id="video" accept="video/*" @change="setFiles">
             </section>
         </fieldset>
+        <fieldset v-if="video.id">
+            <legend>
+                <span class="required">Link zum Video in Vimeo</span>
+            </legend>
+            <section>
+                {{ video.url }}
+            </section>
+        </fieldset>
         <fieldset>
             <legend>
                 Grunddaten
