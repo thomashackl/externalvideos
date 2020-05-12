@@ -42,8 +42,6 @@ class VimeoController extends AuthenticatedController {
         if (Config::get()->VIMEO_ACCESS_TOKEN) {
             PageLayout::postSuccess(dgettext('videos', 'Ihr Stud.IP ist bereits gegenüber Vimeo authentifiziert.'));
         }
-
-        VimeoAPI::getAccessToken();
     }
 
     /**
