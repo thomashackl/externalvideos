@@ -6,7 +6,7 @@
                 <span class="required">Videodatei</span>
             </legend>
             <section>
-                <input type="file" id="video" accept="video/*" @change="setFiles">
+                <input type="file" id="video" accept="video/mp4,video/x-m4v,video/*" @change="setFiles">
             </section>
         </fieldset>
         <fieldset v-if="video.id">
