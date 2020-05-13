@@ -51,6 +51,15 @@ class VideosController extends AuthenticatedController {
 
         $this->assigned_dates = [];
         foreach ($videos as $video) {
+
+            // Check if all assigned dates are still available.
+            foreach ($video->dates as $one) {
+                if (!$one->date) {
+                    $one->delete();
+                    $video->dates->unsetBy('date_id', $one->date_id);
+                }
+            }
+
             if (count($video->dates) > 0) {
 
                 $date = $video->dates->first();
