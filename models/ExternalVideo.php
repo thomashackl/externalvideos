@@ -70,6 +70,7 @@ class ExternalVideo extends SimpleORMap
                 `visible_from` <= NOW() AND `visible_until` IS NULL
                 OR `visible_from` IS NULL AND `visible_until` >= NOW()
                 OR NOW() BETWEEN `visible_from` AND `visible_until`
+                OR `visible_from` IS NULL AND `visible_until` IS NULL
             )
             ORDER BY `position`, `title`",
             ['course' => $course_id]);
