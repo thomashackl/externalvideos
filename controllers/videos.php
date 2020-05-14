@@ -43,7 +43,8 @@ class VideosController extends AuthenticatedController {
         Navigation::activateItem('/course/videos/videos');
 
         PageLayout::setTitle(Context::getHeaderLine() . ' - ' . dgettext('videos', 'Medien'));
-        PageLayout::addScript($this->plugin->getPluginURL() . '/assets/javascripts/externalvideos.js');
+        PageLayout::addScript($this->plugin->getPluginURL() .
+            '/assets/javascripts/externalvideos.js?v=' . $this->plugin->getVersion());
 
         $videos = SimpleCollection::createFromArray($GLOBALS['perm']->have_studip_perm('dozent', $this->course->id) ?
                 ExternalVideo::findByCourse_id($this->course->id) :
@@ -237,7 +238,8 @@ class VideosController extends AuthenticatedController {
             throw new AccessDeniedException();
         }
 
-        PageLayout::addScript($this->plugin->getPluginURL() . '/assets/javascripts/vimeo-upload.js');
+        PageLayout::addScript($this->plugin->getPluginURL() .
+            '/assets/javascripts/vimeo-upload.js?v=' . $this->plugin->getVersion());
 
         $videos = Navigation::getItem('/course/videos');
         $videos->addSubNavigation('vimeo', new Navigation($id == 0 ?
