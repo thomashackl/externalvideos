@@ -39,10 +39,15 @@
                 <label for="password">
                     Passwort (optional)
                 </label>
-                <input type="password" name="password" id="password" size="75" ref="passwordInput"
-                       placeholder="Passwort zur Wiedergabe" v-model="password">
-                <studip-icon shape="visibility-visible" ref="showPassword" size="24" id="show-password-icon"
-                             @click="togglePasswordVisibility"></studip-icon>
+                <template v-if="video.is_mine">
+                    <input type="password" name="password" id="password" size="75" ref="passwordInput"
+                           placeholder="Passwort zur Wiedergabe" v-model="password">
+                    <studip-icon shape="visibility-visible" ref="showPassword" size="24" id="show-password-icon"
+                                 @click="togglePasswordVisibility"></studip-icon>
+                </template>
+                <div id="password" v-else>
+                    Dieses Video gehört einem anderen Vimeo-Account, daher kann hier kein Passwort gesetzt werden.
+                </div>
             </section>
         </fieldset>
         <fieldset>

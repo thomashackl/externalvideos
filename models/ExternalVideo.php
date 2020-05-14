@@ -161,7 +161,7 @@ class ExternalVideo extends SimpleORMap
     public function cbStoreVimeoData($type)
     {
         if (!$this->isNew()) {
-            if ($this->type === 'vimeo') {
+            if ($this->type === 'vimeo' && $this->vimeo_data != null) {
                 $this->vimeoData['name'] = $this->title;
             }
             $result = VimeoAPI::updateVideo($this->external_id, $this->vimeoData);

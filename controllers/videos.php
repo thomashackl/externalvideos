@@ -269,7 +269,8 @@ class VideosController extends AuthenticatedController {
             'title' => $video->vimeo_data != null ? $video->vimeo_data['name'] : $video->title,
             'password' => $video->vimeo_data != null ? $video->vimeo_data['password'] : '',
             'visible_from' => $video->visible_from ? $video->visible_from->format('d.m.Y H:i') : null,
-            'visible_until' => $video->visible_until ? $video->visible_until->format('d.m.Y H:i') : null
+            'visible_until' => $video->visible_until ? $video->visible_until->format('d.m.Y H:i') : null,
+            'is_mine' => $video->vimeo_data != null
         ];
 
         $this->dates = [];
