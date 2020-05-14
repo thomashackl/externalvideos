@@ -106,7 +106,7 @@ class VimeoController extends AuthenticatedController {
         if ($folder = VimeoFolder::findOneByCourse_id($course->id)) {
 
             $uploadLink = VimeoAPI::prepareFileUpload(Request::get('name'),
-                Request::get('description'), Request::int('filesize'));
+                Request::get('description'), Request::int('filesize'), Request::get('password'));
 
             $this->set_status($uploadLink['status']);
             $this->render_json($uploadLink['body']);
@@ -129,7 +129,7 @@ class VimeoController extends AuthenticatedController {
 
                 if ($folder->store()) {
                     $uploadLink = VimeoAPI::prepareFileUpload(Request::get('name'),
-                        Request::get('description'), Request::int('filesize'));
+                        Request::get('description'), Request::int('filesize'), Request::get('password'));
 
                     $this->set_status($uploadLink['status']);
                     $this->render_json($uploadLink['body']);

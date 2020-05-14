@@ -35,6 +35,15 @@
                 <textarea name="description" id="description" maxlength="1024"
                           placeholder="Beschreibungstext des Videos eingeben" v-model="description"></textarea>
             </section>
+            <section>
+                <label for="password">
+                    Passwort (optional)
+                </label>
+                <input type="password" name="password" id="password" size="75" ref="passwordInput"
+                       placeholder="Passwort zur Wiedergabe" v-model="password">
+                <studip-icon shape="visibility-visible" ref="showPassword" size="24" id="show-password-icon"
+                             @click="togglePasswordVisibility"></studip-icon>
+            </section>
         </fieldset>
         <fieldset>
             <legend>
@@ -82,6 +91,7 @@
 <script>
     import bus from 'jsassets/bus'
     import StudipButton from './StudipButton'
+    import StudipIcon from './StudipIcon'
     import StudipLinkButton from './StudipLinkButton'
     import * as tus from 'tus-js-client'
     import VimeoUploadStatus from './VimeoUploadStatus'
@@ -91,6 +101,7 @@
         name: 'EditVimeoVideo',
         components: {
             StudipButton,
+            StudipIcon,
             StudipLinkButton
         },
         props: {
@@ -117,6 +128,7 @@
                 files: [],
                 title: this.video.title,
                 description: this.video.description,
+                password : this.video.password,
                 visibleFrom: this.video.visible_from,
                 visibleUntil: this.video.visible_until
             }
@@ -128,6 +140,10 @@
                     let filename = this.files[0].name
                     this.title = filename.substring(0, filename.lastIndexOf('.')) || filename
                 }
+            },
+            togglePasswordVisibility: function(event) {
+                const currentClass = this.$refs.passwordInput.getAttribute('type')
+                this.$refs.passwordInput.setAttribute('type', currentClass == 'text' ? 'password' : 'text')
             },
             uploadVideo: function(event) {
                 if (this.video.id) {
@@ -181,3 +197,17 @@
         }
     }
 </script>
+
+<style lang="scss">
+    form {
+        fieldset {
+            section {
+                #show-password-icon {
+                    left: -32px;
+                    position: relative;
+                    vertical-align: middle;
+                }
+            }
+        }
+    }
+</style>

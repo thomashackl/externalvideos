@@ -69,7 +69,7 @@ class VimeoAPI {
         }
     }
 
-    public static function prepareFileUpload($name, $description, $filesize)
+    public static function prepareFileUpload($name, $description, $filesize, $password)
     {
         $vimeo = new Vimeo(
             Config::get()->VIMEO_CLIENT_ID,
@@ -85,6 +85,11 @@ class VimeoAPI {
             'name' => $name,
             'description' => $description
         ];
+
+        if ($password != '') {
+            $body['password'] = $password;
+            $body['privacy'] = ['view' => 'password'];
+        }
 
         return $vimeo->request('/me/videos', $body, 'POST');
     }

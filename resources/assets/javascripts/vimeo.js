@@ -4,7 +4,7 @@ let VimeoAPI = {
     USER_AGENT: 'vimeo.php 3.0.5; (http://developer.vimeo.com/api/docs)',
     CONTENT_TYPE: 'application/json',
     PLUGIN_URL: 'plugins.php/externalvideos',
-    prepareUpload: async function(name, description, fileSize) {
+    prepareUpload: async function(name, description, fileSize, password) {
 
         // Prepare file upload
         const initialize = STUDIP.URLHelper.getURL(this.PLUGIN_URL + '/vimeo/initialize_upload')
@@ -12,6 +12,9 @@ let VimeoAPI = {
         let formData = new FormData();
         formData.append('name', name)
         formData.append('description', description)
+        if (password != '') {
+            formData.append('password', password)
+        }
         formData.append('filesize', fileSize)
 
         // Call upload initialization to get a target URL for the video file

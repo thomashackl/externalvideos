@@ -55,7 +55,8 @@
             VimeoAPI.prepareUpload(
                 document.querySelector('#title').value,
                 document.querySelector('#description').value,
-                file.size
+                file.size,
+                document.querySelector('#password').value
             ).then((result) => {
                 if (result !== null) {
                     this.prepareStatus += ' abgeschlossen'
