@@ -46,6 +46,12 @@ class VimeoAPI {
         );
     }
 
+    /**
+     * Gets an access token which can be used to authenticate all future API requests.
+     *
+     * @return bool Was the access token retrieval successful?
+     * @throws \Vimeo\Exceptions\VimeoRequestException
+     */
     public static function getAccessToken()
     {
         $vimeo = new Vimeo(Config::get()->VIMEO_CLIENT_ID, Config::get()->VIMEO_CLIENT_SECRET);
@@ -69,6 +75,18 @@ class VimeoAPI {
         }
     }
 
+    /**
+     * Prepare to upload a file with the given data. Vimeo returns some data
+     * for the video-to-be, including an upload link where the video file can
+     * be uploaded to.
+     *
+     * @param string $name name for the video, required
+     * @param string $description optional description
+     * @param int $filesize size of the video file, required
+     * @param string $password password for video access, optional
+     * @return array
+     * @throws \Vimeo\Exceptions\VimeoRequestException
+     */
     public static function prepareFileUpload($name, $description, $filesize, $password)
     {
         $vimeo = new Vimeo(
@@ -94,6 +112,13 @@ class VimeoAPI {
         return $vimeo->request('/me/videos', $body, 'POST');
     }
 
+    /**
+     * Creates a new folder (=project) in Vimeo.
+     *
+     * @param string $name name for the new folder
+     * @return array
+     * @throws \Vimeo\Exceptions\VimeoRequestException
+     */
     public static function createProject($name)
     {
         $vimeo = new Vimeo(
@@ -109,6 +134,14 @@ class VimeoAPI {
         return $vimeo->request('/me/projects', $body, 'POST');
     }
 
+    /**
+     * Moves an uploaded video to the given folder (=project)
+     *
+     * @param int $videoId the video to move
+     * @param int $projectId the target project
+     * @return array
+     * @throws \Vimeo\Exceptions\VimeoRequestException
+     */
     public static function addVideoToProject($videoId, $projectId)
     {
         $vimeo = new Vimeo(
@@ -120,6 +153,46 @@ class VimeoAPI {
         return $vimeo->request('/me/projects/' . $projectId . '/videos/' . $videoId, [], 'PUT');
     }
 
+    /**
+     * Tries to get data for the given video. This will not work if the
+     * video was uploaded under someone else's Vimeo account.
+     *
+     * @param int $videoId the video to get
+     */
+    public static function getVideo($videoId)
+    {
+        $vimeo = new Vimeo(
+            Config::get()->VIMEO_CLIENT_ID,
+            Config::get()->VIMEO_CLIENT_SECRET,
+            Config::get()->VIMEO_ACCESS_TOKEN
+        );
+
+        return $vimeo->request('/me/videos/' . $videoId);
+    }
+
+    /**
+     * Updates the given video with the given data.
+     *
+     * @param int $videoId the video to get
+     * @param array $data new video data
+     */
+    public static function updateVideo($videoId, $data)
+    {
+        $vimeo = new Vimeo(
+            Config::get()->VIMEO_CLIENT_ID,
+            Config::get()->VIMEO_CLIENT_SECRET,
+            Config::get()->VIMEO_ACCESS_TOKEN
+        );
+
+        return $vimeo->request('/videos/' . $videoId, $data, 'PATCH');
+    }
+
+    /**
+     * Gets OEmbed data for the video at the given URL
+     *
+     * @param string $url video URL
+     * @return array
+     */
     public static function getOEmbed($url)
     {
         $params = [

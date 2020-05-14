@@ -18,6 +18,7 @@
  * @property string external_id database column
  * @property string url database column
  * @property string title database column
+ * @property string password database column
  * @property int position database column
  * @property string course_id database column
  * @property string user_id database column
@@ -29,6 +30,8 @@
 
 class ExternalVideo extends SimpleORMap
 {
+
+    private $vimeoData = null;
 
     protected static function configure($config = [])
     {
@@ -51,8 +54,11 @@ class ExternalVideo extends SimpleORMap
             'on_delete' => 'delete'
         ];
 
+        $config['additional_fields']['vimeo_data'] = true;
+
         $config['registered_callbacks']['before_store'][]     = 'cbDateTimeObject';
         $config['registered_callbacks']['after_store'][]      = 'cbDateTimeObject';
+        $config['registered_callbacks']['before_store'][]      = 'cbStoreVimeoData';
         $config['registered_callbacks']['after_initialize'][] = 'cbDateTimeObject';
 
         parent::configure($config);
@@ -74,6 +80,46 @@ class ExternalVideo extends SimpleORMap
             )
             ORDER BY `position`, `title`",
             ['course' => $course_id]);
+    }
+
+    /**
+     * Fetch video data from Vimeo.
+     *
+     * @return array|null
+     */
+    public function getVimeo_data()
+    {
+        if ($this->type === 'vimeo' && $this->vimeoData == null) {
+            $data = VimeoAPI::getVideo($this->external_id);
+
+            if ($data['status'] == 200) {
+                $this->vimeoData = $data['body'];
+            }
+        }
+        return $this->vimeoData;
+    }
+
+    /**
+     * Sets new Vimeo data for this video.
+     *
+     * @param array $data
+     */
+    public function setVimeo_data($data)
+    {
+        if ($this->type === 'vimeo') {
+            $this->vimeo_data = $data;
+        }
+    }
+
+    public function setPassword($password)
+    {
+        if ($password != '') {
+            $this->vimeoData['privacy']['view'] = 'password';
+            $this->vimeoData['password'] = $password;
+        } else {
+            $this->vimeoData['privacy']['view'] = 'unlisted';
+            unset($this->vimeoData['password']);
+        }
     }
 
     /**
@@ -103,6 +149,26 @@ class ExternalVideo extends SimpleORMap
             }
             if (in_array($type, ['after_initialize', 'after_store']) && $this->$one != null) {
                 $this->$one = new DateTime($this->$one);
+            }
+        }
+    }
+
+    /**
+     * Store data specific to Vimeo videos if applicable.
+     *
+     * @param string $type the event
+     */
+    public function cbStoreVimeoData($type)
+    {
+        if (!$this->isNew()) {
+            if ($this->type === 'vimeo') {
+                $this->vimeoData['name'] = $this->title;
+            }
+            $result = VimeoAPI::updateVideo($this->external_id, $this->vimeoData);
+
+            // Update video link from Vimeo.
+            if ($result['status'] == 200) {
+                $this->url = $result['body']['link'];
             }
         }
     }

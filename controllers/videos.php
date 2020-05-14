@@ -234,6 +234,7 @@ class VideosController extends AuthenticatedController {
      */
     public function edit_vimeo_action($id = 0)
     {
+        SimpleORMap::expireTableScheme();
         if (!$GLOBALS['perm']->have_studip_perm('dozent', $this->course->id)) {
             throw new AccessDeniedException();
         }
@@ -265,7 +266,8 @@ class VideosController extends AuthenticatedController {
             'type' => 'vimeo',
             'external_id' => $video->external_id,
             'url' => $video->url,
-            'title' => $video->title,
+            'title' => $video->vimeo_data != null ? $video->vimeo_data['name'] : $video->title,
+            'password' => $video->vimeo_data != null ? $video->vimeo_data['password'] : '',
             'visible_from' => $video->visible_from ? $video->visible_from->format('d.m.Y H:i') : null,
             'visible_until' => $video->visible_until ? $video->visible_until->format('d.m.Y H:i') : null
         ];
@@ -309,6 +311,8 @@ class VideosController extends AuthenticatedController {
             $video->mkdate = date('Y-m-d H:i:s');
         }
         $video->title = Request::get('title');
+
+        $video->setPassword(Request::get('password'));
 
         $video->visible_from = Request::get('visible_from') ? new DateTime(Request::get('visible_from')) : null;
         $video->visible_until = Request::get('visible_until') ? new DateTime(Request::get('visible_until')) : null;
