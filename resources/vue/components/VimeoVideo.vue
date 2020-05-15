@@ -37,12 +37,20 @@
                 </template>
             </nav>
         </header>
-        <div :id="'vimeo-video-' + video.id" ref="playerContainer" :class="playError ? 'cannot-play' : ''">
-            <studip-icon v-if="playError" shape="decline" role="info" width="32" height="32"></studip-icon>
-            <div v-if="playError">
-                Das Video wurde nicht auf Vimeo gefunden. Möglicherweise
-                wird es gerade vorbereitet und ist in Kürze verfügbar.
-            </div>
+        <div :id="'vimeo-video-' + video.id" ref="playerContainer"
+             :class="inProgress ? 'in-progress' : (playError ? 'cannot-play' : '')">
+            <template v-if="inProgress">
+                <img :src="assetsUrl + 'images/ajax-indicator-black.svg'" height="48" width="48">
+                <div>
+                    Das Video wird gerade auf Vimeo vorbereitet, bitte haben Sie noch etwas Geduld.
+                </div>
+            </template>
+            <template v-if="playError">
+                <studip-icon shape="decline" role="info" width="32" height="32"></studip-icon>
+                <div>
+                    Das Video wurde nicht auf Vimeo gefunden oder kann nicht abgespielt werden.
+                </div>
+            </template>
         </div>
     </section>
 </template>
@@ -81,20 +89,26 @@
                 },
                 player: null,
                 playing: false,
-                playError: false
+                playError: false,
+                inProgress: false,
+                assetsUrl: STUDIP.ASSETS_URL
             }
         },
         mounted() {
-            this.player = new Player('vimeo-video-' + this.video.id, this.options)
-            this.player.ready()
-                .then((response) => {
-                }).catch((error) => {
+            if (this.video.status == 'in_progress') {
+                this.inProgress = true
+            } else {
+                this.player = new Player('vimeo-video-' + this.video.id, this.options)
+                this.player.ready()
+                    .then((response) => {
+                    }).catch((error) => {
                     this.playError = true
                 })
 
-            this.player.on('play', () => {
-                this.playing = true
-            })
+                this.player.on('play', () => {
+                    this.playing = true
+                })
+            }
         },
         computed: {
             realEditUrl: function() {

@@ -39,7 +39,7 @@
                 <label for="password">
                     Passwort (optional)
                 </label>
-                <template v-if="video.is_mine">
+                <template v-if="video.is_mine || !video.id">
                     <input type="password" name="password" id="password" size="75" ref="passwordInput"
                            placeholder="Passwort zur Wiedergabe" v-model="password">
                     <studip-icon shape="visibility-visible" ref="showPassword" size="24" id="show-password-icon"

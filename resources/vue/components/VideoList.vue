@@ -156,8 +156,9 @@
                 }
             }
 
-            .play-me, .loading, .cannot-play {
+            .play-me, .loading, .cannot-play, in-progress {
                 margin-top: 15px;
+                padding: 10px;
                 text-align: center;
 
                 a {
@@ -184,7 +185,7 @@
                 text-align: center;
             }
 
-            .cannot-play {
+            .cannot-play, .in-progress {
                 font-style: italic;
                 font-size: small;
             }
