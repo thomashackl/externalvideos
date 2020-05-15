@@ -95,7 +95,8 @@
             }
         },
         mounted() {
-            if (this.video.status == 'in_progress') {
+            if (this.video.status == 'in_progress' || this.video.status == 'transcoding' ||
+                    this.video.status == 'transcode_starting') {
                 this.inProgress = true
             } else {
                 this.player = new Player('vimeo-video-' + this.video.id, this.options)

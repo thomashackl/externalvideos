@@ -81,7 +81,8 @@
                     <option value="">
                         -- keinem Termin zuordnen --
                     </option>
-                    <option v-for="date in dates" :key="date.id" :value="date.id">{{ date.name }}</option>
+                    <option v-for="date in dates" :key="date.id" :value="date.id"
+                            :selected="video.dates.includes(date.id)">{{ date.name }}</option>
                 </select>
             </section>
         </fieldset>

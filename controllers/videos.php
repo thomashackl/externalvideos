@@ -84,9 +84,7 @@ class VideosController extends AuthenticatedController {
                     'visible_until' => $video->visible_until != null ?
                         $video->visible_until->format('d.m.y H:i') : null,
                     'visible' => $video->isVisible(),
-                    'status' => $video->vimeo_data['status'],
-                    'upload' => $video->vimeo_data['upload']['status'],
-                    'transcode' => $video->vimeo_data['transcode']['status']
+                    'status' => $video->vimeo_data['status']
                 ];
 
             } else {
@@ -110,9 +108,7 @@ class VideosController extends AuthenticatedController {
                     'visible_until' => $video->visible_until != null ?
                         $video->visible_until->format('d.m.y H:i') : null,
                     'visible' => $video->isVisible(),
-                    'status' => $video->vimeo_data['status'],
-                    'upload' => $video->vimeo_data['upload']['status'],
-                    'transcode' => $video->vimeo_data['transcode']['status']
+                    'status' => $video->vimeo_data['status']
                 ];
 
             }
@@ -262,9 +258,9 @@ class VideosController extends AuthenticatedController {
         }
 
         if (count($video->dates) > 0) {
-            $this->selected_dates = $video->dates->pluck('date_id');
+            $selected_dates = $video->dates->pluck('date_id');
         } else {
-            $this->selected_dates = [];
+            $selected_dates = [];
         }
 
         $this->video = [
@@ -276,6 +272,7 @@ class VideosController extends AuthenticatedController {
             'password' => $video->vimeo_data != null ? $video->vimeo_data['password'] : '',
             'visible_from' => $video->visible_from ? $video->visible_from->format('d.m.Y H:i') : null,
             'visible_until' => $video->visible_until ? $video->visible_until->format('d.m.Y H:i') : null,
+            'dates' => $selected_dates,
             'is_mine' => $video->vimeo_data != null
         ];
 

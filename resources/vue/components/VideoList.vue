@@ -162,7 +162,7 @@
                 }
             }
 
-            .play-me, .loading, .cannot-play, in-progress {
+            .play-me, .loading, .cannot-play, .in-progress {
                 margin-top: 15px;
                 padding: 10px;
                 text-align: center;
