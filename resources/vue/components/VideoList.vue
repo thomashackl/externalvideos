@@ -41,8 +41,8 @@
         },
         props: {
             dates: {
-                type: Array,
-                default: () => []
+                type: Object,
+                default: () => {}
             },
             getVideoSrcUrl: {
                 type: String
@@ -59,6 +59,12 @@
         data() {
             return {
                 openDates: []
+            }
+        },
+        mounted() {
+            const keys = Object.keys(this.dates)
+            if (keys.length == 1) {
+                this.openDates.push(keys[0])
             }
         },
         methods: {
