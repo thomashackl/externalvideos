@@ -36,6 +36,7 @@ class ExternalVideoDate extends SimpleORMap
             'assoc_foreign_key' => 'termin_id'
         ];
         $config['additional_fields']['datename'] = true;
+        $config['additional_fields']['datestart'] = true;
 
         parent::configure($config);
     }
@@ -48,6 +49,10 @@ class ExternalVideoDate extends SimpleORMap
         }
 
         return $name;
+    }
+
+    public function getDatestart() {
+        return $this->date->date;
     }
 
 }

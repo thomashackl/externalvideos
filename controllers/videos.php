@@ -69,6 +69,7 @@ class VideosController extends AuthenticatedController {
                     $this->assigned_dates[$date->date_id] = [
                         'id' => $date->date_id,
                         'name' => $date->datename,
+                        'start' => $date->datestart,
                         'videos' => []
                     ];
                 }
@@ -113,6 +114,11 @@ class VideosController extends AuthenticatedController {
 
             }
         }
+
+        // Sort dates by their start time, providing chronological order.
+        usort($this->assigned_dates, function($a, $b) {
+            return $a['start'] - $b['start'];
+        });
 
         $this->permission = $GLOBALS['perm']->have_studip_perm('dozent', $this->course->id);
 
