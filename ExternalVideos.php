@@ -47,7 +47,28 @@ class ExternalVideos extends StudIPPlugin implements StandardPlugin, SystemPlugi
 
     public function getIconNavigation($course_id, $last_visit, $user_id)
     {
-        return null;
+        $user_id || $user_id = $GLOBALS['user']->id;
+        $icon = new Navigation(
+            'Videos',
+            PluginEngine::getURL($this, [], 'videos')
+        );
+        $icon->setImage(Icon::create('play', Icon::ROLE_INACTIVE, ['title' => _('Videos')]));
+
+        $condition = "`course_id` = :course
+            AND `user_id` != :me
+            AND `mkdate` >= :lastvisit";
+        $videos = ExternalVideo::findBySQL($condition, [
+            'course' => $course_id,
+            'lastvisit' => date('Y-m-d H:i', 0),
+            'me'        => $user_id
+        ]);
+
+        if (count($videos) > 0) {
+            $icon->setImage(Icon::create('play+new', Icon::ROLE_ATTENTION,
+                ['title' => dgettext('videos', 'Es gibt neue Videos')]));
+            $icon->setTitle(dgettext('videos', 'Es gibt neue Videos'));
+        }
+        return $icon;
     }
 
     public function getTabNavigation($course_id)
