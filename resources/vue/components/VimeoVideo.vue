@@ -30,8 +30,7 @@
                     <a :href="realEditUrl" title="Bearbeiten">
                         <studip-icon shape="edit" size="16" role="info_alt"></studip-icon>
                     </a>
-                    <a :href="realDeleteUrl" title="Löschen"
-                       data-confirm="Wollen Sie das Video wirklich löschen? Es wird nur aus Stud.IP, aber nicht auf Vimeo gelöscht.">
+                    <a :href="realDeleteUrl" title="Löschen" data-dialog="size=auto">
                         <studip-icon shape="trash" size="16" role="info_alt"></studip-icon>
                     </a>
                 </template>

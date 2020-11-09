@@ -188,6 +188,22 @@ class VimeoAPI {
     }
 
     /**
+     * Deletes the given video.
+     *
+     * @param int $videoId the video to delete
+     */
+    public static function deleteVideo($videoId)
+    {
+        $vimeo = new Vimeo(
+            Config::get()->VIMEO_CLIENT_ID,
+            Config::get()->VIMEO_CLIENT_SECRET,
+            Config::get()->VIMEO_ACCESS_TOKEN
+        );
+
+        return $vimeo->request('/videos/' . $videoId, [], 'DELETE');
+    }
+
+    /**
      * Gets OEmbed data for the video at the given URL
      *
      * @param string $url video URL

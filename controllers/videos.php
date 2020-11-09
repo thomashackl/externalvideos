@@ -461,6 +461,20 @@ class VideosController extends AuthenticatedController {
     }
 
     /**
+     * Confirm video deletion.
+     *
+     * @param int $id
+     */
+    public function confirm_delete_action($id)
+    {
+        if (!$GLOBALS['perm']->have_studip_perm('dozent', $this->course->id)) {
+            throw new AccessDeniedException();
+        }
+
+        $this->video = ExternalVideo::find($id);
+    }
+
+    /**
      * Delete the given video.
      *
      * @param int $id
@@ -471,10 +485,22 @@ class VideosController extends AuthenticatedController {
         }
 
         $video = ExternalVideo::find($id);
+        $external_id = $video->external_id;
 
         if ($video->delete()) {
-            PageLayout::postSuccess(
-                dgettext('videos','Das Video wurde gelöscht.'));
+
+            if (Request::int('delete_vimeo') == 1) {
+                $result = VimeoAPI::deleteVideo($external_id);
+
+                if ($result['status'] == 204) {
+                    PageLayout::postSuccess(
+                        dgettext('videos','Das Video wurde in Stud.IP und Vimeo gelöscht.'));
+                } else {
+                    PageLayout::postWarning(dgettext('videos','Das Video wurde in Stud.IP ' .
+                        'gelöscht, konnte aber nicht in Vimeo entfernt werden.'));
+                }
+            }
+
         } else {
             PageLayout::postError(
                 dgettext('videos','Das Video konnte nicht gelöscht werden.'));
