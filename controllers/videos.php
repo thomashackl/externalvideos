@@ -85,7 +85,8 @@ class VideosController extends AuthenticatedController {
                     'visible_until' => $video->visible_until != null ?
                         $video->visible_until->format('d.m.y H:i') : null,
                     'visible' => $video->isVisible(),
-                    'status' => $video->vimeo_data['status']
+                    'status' => $video->vimeo_data['status'],
+                    'plays' => $video->vimeo_data['stats']['plays']
                 ];
 
             } else {
@@ -109,7 +110,8 @@ class VideosController extends AuthenticatedController {
                     'visible_until' => $video->visible_until != null ?
                         $video->visible_until->format('d.m.y H:i') : null,
                     'visible' => $video->isVisible(),
-                    'status' => $video->vimeo_data['status']
+                    'status' => $video->vimeo_data['status'],
+                    'plays' => $video->vimeo_data['stats']['plays']
                 ];
 
             }
@@ -242,7 +244,6 @@ class VideosController extends AuthenticatedController {
      */
     public function edit_vimeo_action($id = 0)
     {
-        SimpleORMap::expireTableScheme();
         if (!$GLOBALS['perm']->have_studip_perm('dozent', $this->course->id)) {
             throw new AccessDeniedException();
         }
@@ -279,7 +280,8 @@ class VideosController extends AuthenticatedController {
             'visible_from' => $video->visible_from ? $video->visible_from->format('d.m.Y H:i') : null,
             'visible_until' => $video->visible_until ? $video->visible_until->format('d.m.Y H:i') : null,
             'dates' => $selected_dates,
-            'is_mine' => $video->vimeo_data != null
+            'is_mine' => $video->vimeo_data != null,
+            'embed' => $video->vimeo_data != null ? $video->vimeo_data['embed']['html'] : null
         ];
 
         $this->dates = [];

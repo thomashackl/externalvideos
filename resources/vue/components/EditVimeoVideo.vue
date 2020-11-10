@@ -11,10 +11,17 @@
         </fieldset>
         <fieldset v-if="video.id">
             <legend>
-                Link zum Video in Vimeo
+                Daten aus Vimeo
             </legend>
             <section>
-                {{ video.url }}
+                Link zum Video: {{ video.url }}
+            </section>
+            <section>
+                <a href="" @click="copy" v-if="!copied">
+                    Embed-Code in die Zwischenablage kopieren
+                </a>
+                <textarea id="embed"></textarea>
+                <studip-messagebox v-if="copied" type="success" message="Embed-Code kopiert!"></studip-messagebox>
             </section>
         </fieldset>
         <fieldset>
@@ -101,11 +108,13 @@
     import StudipLinkButton from './StudipLinkButton'
     import * as tus from 'tus-js-client'
     import VimeoUploadStatus from './VimeoUploadStatus'
+    import StudipMessagebox from "./StudipMessagebox";
     var UploadClass = Vue.extend(VimeoUploadStatus)
 
     export default {
         name: 'EditVimeoVideo',
         components: {
+            StudipMessagebox,
             StudipButton,
             StudipIcon,
             StudipLinkButton
@@ -136,7 +145,8 @@
                 description: this.video.description,
                 password : this.video.password,
                 visibleFrom: this.video.visible_from,
-                visibleUntil: this.video.visible_until
+                visibleUntil: this.video.visible_until,
+                copied: false
             }
         },
         methods: {
@@ -186,6 +196,19 @@
                     })
                 }
             },
+            copy: function(event) {
+                event.preventDefault()
+
+                const embedInput = document.getElementById('embed')
+                embedInput.value = this.video.embed
+                embedInput.select()
+                embedInput.setSelectionRange(0, 99999)
+
+                document.execCommand('copy')
+                this.copied = true
+
+                setTimeout(() => this.copied = false, 1500)
+            },
             createUrlWithId: function(url, addition) {
                 const parts = url.split('?')
                 let fullUrl = parts[0]
@@ -208,6 +231,10 @@
     form {
         fieldset {
             section {
+                #embed {
+                    display:none;
+                }
+
                 #show-password-icon {
                     left: -32px;
                     position: relative;

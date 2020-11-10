@@ -125,6 +125,7 @@
             border: 1px solid #28497c;
             height: 250px;
             margin: 5px;
+            position: relative;
             transition: width 300ms ease-in-out, height 300ms ease-in-out;
             width: 300px;
 
@@ -207,6 +208,20 @@
                 header {
                     background-color: mix(#28497c, #ffffff, 40%);
                 }
+            }
+
+            footer {
+                background-color: #28497c;
+                bottom: 0;
+                color: white;
+                flex-direction: row;
+                font-size: smaller;
+                font-style: italic;
+                padding: 2px;
+                padding-left: 5px;
+                padding-right: 5px;
+                position: absolute;
+                width: calc(100% - 10px);
             }
         }
     }

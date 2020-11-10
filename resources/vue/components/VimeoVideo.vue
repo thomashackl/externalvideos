@@ -51,6 +51,9 @@
                 </div>
             </template>
         </div>
+        <footer>
+            {{ video.plays }} Aufrufe
+        </footer>
     </section>
 </template>
 
