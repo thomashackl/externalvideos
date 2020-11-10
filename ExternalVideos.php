@@ -59,7 +59,7 @@ class ExternalVideos extends StudIPPlugin implements StandardPlugin, SystemPlugi
             AND `mkdate` >= :lastvisit";
         $videos = ExternalVideo::findBySQL($condition, [
             'course' => $course_id,
-            'lastvisit' => date('Y-m-d H:i', 0),
+            'lastvisit' => date('Y-m-d H:i', $last_visit),
             'me'        => $user_id
         ]);
 
