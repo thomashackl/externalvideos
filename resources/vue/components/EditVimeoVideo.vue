@@ -19,7 +19,7 @@
             <section>
                 <label for="embed">
                     Embed-Code:
-                </label>>
+                </label>
                 <textarea id="embed">{{ video.embed }}</textarea>
             </section>
         </fieldset>
