@@ -17,11 +17,10 @@
                 Link zum Video: {{ video.url }}
             </section>
             <section>
-                <a href="" @click="copy" v-if="!copied">
-                    Embed-Code in die Zwischenablage kopieren
-                </a>
-                <textarea id="embed"></textarea>
-                <studip-messagebox v-if="copied" type="success" message="Embed-Code kopiert!"></studip-messagebox>
+                <label for="embed">
+                    Embed-Code:
+                </label>>
+                <textarea id="embed">{{ video.embed }}</textarea>
             </section>
         </fieldset>
         <fieldset>
@@ -196,19 +195,6 @@
                     })
                 }
             },
-            copy: function(event) {
-                event.preventDefault()
-
-                const embedInput = document.getElementById('embed')
-                embedInput.value = this.video.embed
-                embedInput.select()
-                embedInput.setSelectionRange(0, 99999)
-
-                document.execCommand('copy')
-                this.copied = true
-
-                setTimeout(() => this.copied = false, 1500)
-            },
             createUrlWithId: function(url, addition) {
                 const parts = url.split('?')
                 let fullUrl = parts[0]
@@ -231,10 +217,6 @@
     form {
         fieldset {
             section {
-                #embed {
-                    display:none;
-                }
-
                 #show-password-icon {
                     left: -32px;
                     position: relative;
