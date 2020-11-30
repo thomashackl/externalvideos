@@ -1,6 +1,6 @@
 {
     "name": "@studip/videos",
-    "version": "1.6.1",
+    "version": "1.6.2",
     "description": "Videos from Vimeo or external cloud services for Stud.IP courses",
     "license": "GPL-2.0",
     "private": true,
