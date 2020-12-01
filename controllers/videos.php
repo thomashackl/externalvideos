@@ -85,8 +85,7 @@ class VideosController extends AuthenticatedController {
                     'visible_until' => $video->visible_until != null ?
                         $video->visible_until->format('d.m.y H:i') : null,
                     'visible' => $video->isVisible(),
-                    'status' => $video->vimeo_data['status'],
-                    'plays' => $video->vimeo_data['stats']['plays']
+                    'status' => 'not-loaded'
                 ];
 
             } else {
@@ -110,8 +109,7 @@ class VideosController extends AuthenticatedController {
                     'visible_until' => $video->visible_until != null ?
                         $video->visible_until->format('d.m.y H:i') : null,
                     'visible' => $video->isVisible(),
-                    'status' => $video->vimeo_data['status'],
-                    'plays' => $video->vimeo_data['stats']['plays']
+                    'status' => 'not-loaded'
                 ];
 
             }
@@ -520,6 +518,20 @@ class VideosController extends AuthenticatedController {
     {
         $video = ExternalVideo::find($id);
         $this->render_json($video->getVideoSource());
+    }
+
+    /**
+     * Get number of views and current status from Vimeo.
+     *
+     * @param int $id
+     */
+    public function get_vimeo_data_action($id)
+    {
+        $video = ExternalVideo::find($id);
+        $this->render_json([
+            'status' => $video->vimeo_data['status'],
+            'plays' => $video->vimeo_data['stats']['plays']
+        ]);
     }
 
 }

@@ -38,6 +38,9 @@
         </header>
         <div :id="'vimeo-video-' + video.id" ref="playerContainer"
              :class="inProgress ? 'in-progress' : (playError ? 'cannot-play' : '')">
+            <template v-if="loadingVimeoData">
+                <vue-simple-spinner size="32" message="Videodaten werden geladen..."></vue-simple-spinner>
+            </template>
             <template v-if="inProgress">
                 <img :src="assetsUrl + 'images/ajax-indicator-black.svg'" height="48" width="48">
                 <div>
@@ -52,18 +55,20 @@
             </template>
         </div>
         <footer>
-            {{ video.plays }} Aufrufe
+            {{ plays }} Aufrufe
         </footer>
     </section>
 </template>
 
 <script>
     import StudipIcon from './StudipIcon'
+    import VueSimpleSpinner from 'vue-simple-spinner'
     import Player from '@vimeo/player'
 
     export default {
         name: 'VimeoVideo',
         components: {
+            VueSimpleSpinner,
             StudipIcon
         },
         props: {
@@ -93,25 +98,46 @@
                 playing: false,
                 playError: false,
                 inProgress: false,
-                assetsUrl: STUDIP.ASSETS_URL
+                loadingVimeoData: false,
+                assetsUrl: STUDIP.ASSETS_URL,
+                currentStatus: this.video.status,
+                plays: 0
             }
         },
         mounted() {
-            if (this.video.status == 'in_progress' || this.video.status == 'transcoding' ||
-                    this.video.status == 'transcode_starting') {
-                this.inProgress = true
-            } else {
-                this.player = new Player('vimeo-video-' + this.video.id, this.options)
-                this.player.ready()
-                    .then((response) => {
-                    }).catch((error) => {
-                    this.playError = true
-                })
+            this.loadingVimeoData = true
+            fetch(STUDIP.URLHelper.getURL('plugins.php/externalvideos/videos/get_vimeo_data/' + this.video.id))
+            .then((response) => {
+                if (!response.ok) {
+                    throw response
+                }
 
-                this.player.on('play', () => {
-                    this.playing = true
+                response.json().then(json => {
+                    this.currentStatus = json.status
+                    this.plays = json.plays
+
+                    this.loadingVimeoData = false
+
+                    if (this.currentStatus == 'in_progress' || this.currentStatus == 'transcoding' ||
+                        this.currentStatus == 'transcode_starting') {
+                        this.inProgress = true
+                    } else {
+                        this.player = new Player('vimeo-video-' + this.video.id, this.options)
+                        this.player.ready()
+                            .then((response) => {
+                            }).catch((error) => {
+                            this.playError = true
+                        })
+
+                        this.player.on('play', () => {
+                            this.playing = true
+                        })
+                    }
                 })
-            }
+            }).catch((error) => {
+                console.error(error)
+                console.error(error.status + ': ', error.statusText)
+            })
         },
         computed: {
             realEditUrl: function() {
