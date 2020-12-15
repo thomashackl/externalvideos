@@ -56,9 +56,16 @@ class ExternalVideos extends StudIPPlugin implements StandardPlugin, SystemPlugi
 
         $condition = "`course_id` = :course
             AND `user_id` != :me
+            AND (
+                    (`visible_from` IS NULL AND `visible_until` IS NULL)
+                    OR (`visible_from` IS NULL AND `visible_until` >= :now)
+                    OR (`visible_until` IS NULL AND `visible_from` <= :now)
+                    OR (:now BETWEEN `visible_from` AND `visible_until`)
+                )
             AND `mkdate` >= :lastvisit";
         $videos = ExternalVideo::findBySQL($condition, [
-            'course' => $course_id,
+            'course'    => $course_id,
+            'now'       => date('Y-m-d H:i', time()),
             'lastvisit' => date('Y-m-d H:i', $last_visit),
             'me'        => $user_id
         ]);
