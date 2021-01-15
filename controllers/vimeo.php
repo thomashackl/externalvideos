@@ -96,14 +96,12 @@ class VimeoController extends AuthenticatedController {
 
     public function initialize_upload_action()
     {
-        $course = Course::findCurrent();
-
-        if (!$GLOBALS['perm']->have_studip_perm('dozent', $course->id)) {
+        if (!$GLOBALS['perm']->have_studip_perm('dozent', Context::getId())) {
             throw new AccessDeniedException();
         }
 
         // First check if folder needs to be created.
-        if ($folder = VimeoFolder::findOneByCourse_id($course->id)) {
+        if ($folder = VimeoFolder::findOneByRange_id(Context::getId())) {
 
             $uploadLink = VimeoAPI::prepareFileUpload(Request::get('name'),
                 Request::get('description'), Request::int('filesize'), Request::get('password'));
@@ -114,14 +112,14 @@ class VimeoController extends AuthenticatedController {
         } else {
 
             $vimeo = VimeoAPI::createProject(
-                VimeoFolder::generateName($course)
+                VimeoFolder::generateName(Context::get())
             );
 
             // Folder created successfully
             if ($vimeo['status'] == 201) {
 
                 $folder = new VimeoFolder();
-                $folder->course_id = $course->id;
+                $folder->range_id = Context::getId();
 
                 $folder->vimeo_id = mb_substr($vimeo['body']['uri'], mb_strrpos($vimeo['body']['uri'], '/') + 1);
                 $folder->mkdate = date('Y-m-d H:i:s');
@@ -150,12 +148,11 @@ class VimeoController extends AuthenticatedController {
 
     public function move_to_folder_action()
     {
-        $course = Course::findCurrent();
-        if (!$GLOBALS['perm']->have_studip_perm('dozent', $course->id)) {
+        if (!$GLOBALS['perm']->have_studip_perm('dozent', Context::getId())) {
             throw new AccessDeniedException();
         }
 
-        $folder = VimeoFolder::findOneByCourse_id($course->id);
+        $folder = VimeoFolder::findOneByRange_id(Context::getId());
 
         $result = VimeoAPI::addVideoToProject(Request::int('video_id'), $folder->vimeo_id);
         $this->set_status($result['status']);

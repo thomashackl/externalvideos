@@ -2,26 +2,37 @@
     <studip-messagebox v-if="dates.length < 1" message="Es sind noch keine Medien vorhanden!"
                         type="info"></studip-messagebox>
     <div v-else>
-        <section class="date" v-for="date in dates" :key="date.id" :id="date.id">
-            <header>
-                <h1>
-                    <a href="" @click="toggleDate(date.id, $event)">
-                        <studip-icon :shape="openDates.includes(date.id) ? 'arr_1down' : 'arr_1right'"
-                                     size="20"></studip-icon>
-                        {{ date.name }}
-                    </a>
-                </h1>
-            </header>
-            <div v-if="openDates.includes(date.id)">
-                <template v-for="video in date.videos">
-                    <shared-video v-if="video.type == 'share'" :key="video.id" :video="video"
-                                  :get-src-url="getVideoSrcUrl" :edit-url="editUrl"
-                                  :delete-url="deleteUrl"></shared-video>
-                    <vimeo-video v-if="video.type == 'vimeo'" :key="video.id" :video="video"
-                                 :edit-url="editUrl" :delete-url="deleteUrl"></vimeo-video>
-                </template>
-            </div>
-        </section>
+        <div v-if="dateGrouping">
+            <section class="date" v-for="date in dates" :key="date.id" :id="date.id">
+                <header>
+                    <h1>
+                        <a href="" @click="toggleDate(date.id, $event)">
+                            <studip-icon :shape="openDates.includes(date.id) ? 'arr_1down' : 'arr_1right'"
+                                         size="20"></studip-icon>
+                            {{ date.name }}
+                        </a>
+                    </h1>
+                </header>
+                <div v-if="openDates.includes(date.id)">
+                    <template v-for="video in date.videos">
+                        <shared-video v-if="video.type == 'share'" :key="video.id" :video="video"
+                                      :get-src-url="getVideoSrcUrl" :edit-url="editUrl"
+                                      :delete-url="deleteUrl"></shared-video>
+                        <vimeo-video v-if="video.type == 'vimeo'" :key="video.id" :video="video"
+                                     :edit-url="editUrl" :delete-url="deleteUrl"></vimeo-video>
+                    </template>
+                </div>
+            </section>
+        </div>
+        <div v-else class="date">
+            <template v-for="video in dates[0].videos">
+                <shared-video v-if="video.type == 'share'" :key="video.id" :video="video"
+                              :get-src-url="getVideoSrcUrl" :edit-url="editUrl"
+                              :delete-url="deleteUrl"></shared-video>
+                <vimeo-video v-if="video.type == 'vimeo'" :key="video.id" :video="video"
+                             :edit-url="editUrl" :delete-url="deleteUrl"></vimeo-video>
+            </template>
+        </div>
     </div>
 </template>
 
@@ -65,6 +76,16 @@
             const keys = Object.keys(this.dates)
             if (keys.length == 1) {
                 this.openDates.push(keys[0])
+            }
+        },
+        computed: {
+            dateGrouping: function() {
+                const keys = Object.keys(this.dates)
+                if (keys.length == 1 && keys.filter(key => key != '0').length == 0) {
+                    return false
+                } else {
+                    return true
+                }
             }
         },
         methods: {

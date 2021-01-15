@@ -45,7 +45,7 @@ class ExternalVideos extends StudIPPlugin implements StandardPlugin, SystemPlugi
         return $metadata['version'];
     }
 
-    public function getIconNavigation($course_id, $last_visit, $user_id)
+    public function getIconNavigation($range_id, $last_visit, $user_id)
     {
         $user_id || $user_id = $GLOBALS['user']->id;
         $icon = new Navigation(
@@ -54,7 +54,7 @@ class ExternalVideos extends StudIPPlugin implements StandardPlugin, SystemPlugi
         );
         $icon->setImage(Icon::create('play', Icon::ROLE_INACTIVE, ['title' => _('Videos')]));
 
-        $condition = "`course_id` = :course
+        $condition = "`range_id` = :range
             AND `user_id` != :me
             AND (
                     (`visible_from` IS NULL AND `visible_until` IS NULL)
@@ -64,7 +64,7 @@ class ExternalVideos extends StudIPPlugin implements StandardPlugin, SystemPlugi
                 )
             AND `mkdate` >= :lastvisit";
         $videos = ExternalVideo::findBySQL($condition, [
-            'course'    => $course_id,
+            'range'    => $range_id,
             'now'       => date('Y-m-d H:i', time()),
             'lastvisit' => date('Y-m-d H:i', $last_visit),
             'me'        => $user_id
@@ -78,7 +78,7 @@ class ExternalVideos extends StudIPPlugin implements StandardPlugin, SystemPlugi
         return $icon;
     }
 
-    public function getTabNavigation($course_id)
+    public function getTabNavigation($range_id)
     {
         if ($GLOBALS['user']->id == 'nobody') {
             return [];

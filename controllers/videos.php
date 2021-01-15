@@ -23,10 +23,10 @@ class VideosController extends AuthenticatedController {
     {
         $this->plugin = $this->dispatcher->current_plugin;
 
-        $this->course = Course::findCurrent();
-
-        if (!$GLOBALS['perm']->have_studip_perm('user', $this->course->id)) {
-            throw new AccessDeniedException();
+        if (Context::isCourse()) {
+            if (!$GLOBALS['perm']->have_studip_perm('user', Context::getId())) {
+                throw new AccessDeniedException();
+            }
         }
 
         $this->set_layout(Request::isXhr() ? null : $GLOBALS['template_factory']->open('layouts/base'));
@@ -46,9 +46,9 @@ class VideosController extends AuthenticatedController {
         PageLayout::addScript($this->plugin->getPluginURL() .
             '/assets/javascripts/externalvideos.js?v=' . $this->plugin->getVersion());
 
-        $videos = SimpleCollection::createFromArray($GLOBALS['perm']->have_studip_perm('dozent', $this->course->id) ?
-                ExternalVideo::findByCourse_id($this->course->id) :
-                ExternalVideo::findByCourseAndVisibility($this->course->id))->orderBy('position, title');
+        $videos = SimpleCollection::createFromArray($GLOBALS['perm']->have_studip_perm('dozent', Context::getId()) ?
+                ExternalVideo::findByRange_id(Context::getId()) :
+                ExternalVideo::findByRangeAndVisibility(Context::getId()))->orderBy('position, title');
 
         $this->assigned_dates = [];
         foreach ($videos as $video) {
@@ -120,9 +120,9 @@ class VideosController extends AuthenticatedController {
             return $a['start'] - $b['start'];
         });
 
-        $this->permission = $GLOBALS['perm']->have_studip_perm('dozent', $this->course->id);
+        $this->permission = $GLOBALS['perm']->have_studip_perm('dozent', Context::getId());
 
-        if ($GLOBALS['perm']->have_studip_perm('dozent', $this->course->id)) {
+        if ($GLOBALS['perm']->have_studip_perm('dozent', Context::getId())) {
             $sidebar = Sidebar::get();
             $actions = new ActionsWidget();
             $actions->addLink(dgettext('videos', 'Video für Vimeo hochladen'),
@@ -141,7 +141,7 @@ class VideosController extends AuthenticatedController {
 
     public function edit_share_action($id = 0)
     {
-        if (!$GLOBALS['perm']->have_studip_perm('dozent', $this->course->id)) {
+        if (!$GLOBALS['perm']->have_studip_perm('dozent', Context::getId())) {
             throw new AccessDeniedException();
         }
 
@@ -162,14 +162,17 @@ class VideosController extends AuthenticatedController {
         }
 
         $this->dates = [];
-        foreach ($this->course->dates as $date) {
-            $name = date('d.m.Y H:i', $date->date) . ' - ' .
-                date('H:i', $date->end_time);
-            if ($room = $date->getRoomName()) {
-                $name .= ' (' . $room . ')';
-            }
 
-            $this->dates[$date->id] = $name;
+        if (Context::isCourse()) {
+            foreach (Context::get()->dates as $date) {
+                $name = date('d.m.Y H:i', $date->date) . ' - ' .
+                    date('H:i', $date->end_time);
+                if ($room = $date->getRoomName()) {
+                    $name .= ' (' . $room . ')';
+                }
+
+                $this->dates[$date->id] = $name;
+            }
         }
     }
 
@@ -181,7 +184,7 @@ class VideosController extends AuthenticatedController {
      */
     public function store_share_action($id = 0)
     {
-        if (!$GLOBALS['perm']->have_studip_perm('dozent', $this->course->id)) {
+        if (!$GLOBALS['perm']->have_studip_perm('dozent', Context::getId())) {
             throw new AccessDeniedException();
         }
 
@@ -194,7 +197,7 @@ class VideosController extends AuthenticatedController {
             $video->type = 'share';
             $video->mkdate = date('Y-m-d H:i:s');
         }
-        $video->course_id = $this->course->id;
+        $video->range_id = Context::getId();
         $video->user_id = $GLOBALS['user']->id;
         $video->title = Request::get('title');
         $video->url = Request::get('url');
@@ -242,7 +245,7 @@ class VideosController extends AuthenticatedController {
      */
     public function edit_vimeo_action($id = 0)
     {
-        if (!$GLOBALS['perm']->have_studip_perm('dozent', $this->course->id)) {
+        if (!$GLOBALS['perm']->have_studip_perm('dozent', Context::getId())) {
             throw new AccessDeniedException();
         }
 
@@ -283,17 +286,20 @@ class VideosController extends AuthenticatedController {
         ];
 
         $this->dates = [];
-        foreach ($this->course->dates as $date) {
-            $name = date('d.m.Y H:i', $date->date) . ' - ' .
-                date('H:i', $date->end_time);
-            if ($room = $date->getRoomName()) {
-                $name .= ' (' . $room . ')';
-            }
 
-            $this->dates[] = [
-                'id' => $date->id,
-                'name' => $name
-            ];
+        if (Context::isCourse()) {
+            foreach (Context::get()->dates as $date) {
+                $name = date('d.m.Y H:i', $date->date) . ' - ' .
+                    date('H:i', $date->end_time);
+                if ($room = $date->getRoomName()) {
+                    $name .= ' (' . $room . ')';
+                }
+
+                $this->dates[] = [
+                    'id' => $date->id,
+                    'name' => $name
+                ];
+            }
         }
     }
 
@@ -305,7 +311,7 @@ class VideosController extends AuthenticatedController {
      */
     public function store_vimeo_action($id = 0)
     {
-        if (!$GLOBALS['perm']->have_studip_perm('dozent', $this->course->id)) {
+        if (!$GLOBALS['perm']->have_studip_perm('dozent', Context::getId())) {
             throw new AccessDeniedException();
         }
 
@@ -316,7 +322,7 @@ class VideosController extends AuthenticatedController {
             $video->type = 'vimeo';
             $video->url = Request::get('url');
             $video->external_id = Request::get('external_id');
-            $video->course_id = $this->course->id;
+            $video->range_id = Context::getId();
             $video->user_id = $GLOBALS['user']->id;
             $video->mkdate = date('Y-m-d H:i:s');
         }
@@ -365,7 +371,7 @@ class VideosController extends AuthenticatedController {
      */
     public function import_vimeo_action()
     {
-        if (!$GLOBALS['perm']->have_studip_perm('dozent', $this->course->id)) {
+        if (!$GLOBALS['perm']->have_studip_perm('dozent', Context::getId())) {
             throw new AccessDeniedException();
         }
 
@@ -374,20 +380,23 @@ class VideosController extends AuthenticatedController {
         $this->selected_dates = [];
 
         $this->dates = [];
-        foreach ($this->course->dates as $date) {
-            $name = date('d.m.Y H:i', $date->date) . ' - ' .
-                date('H:i', $date->end_time);
-            if ($room = $date->getRoomName()) {
-                $name .= ' (' . $room . ')';
-            }
 
-            $this->dates[$date->id] = $name;
+        if (Context::isCourse()) {
+            foreach (Context::get()->dates as $date) {
+                $name = date('d.m.Y H:i', $date->date) . ' - ' .
+                    date('H:i', $date->end_time);
+                if ($room = $date->getRoomName()) {
+                    $name .= ' (' . $room . ')';
+                }
+
+                $this->dates[$date->id] = $name;
+            }
         }
     }
 
     public function do_import_vimeo_action()
     {
-        if (!$GLOBALS['perm']->have_studip_perm('dozent', $this->course->id)) {
+        if (!$GLOBALS['perm']->have_studip_perm('dozent', Context::getId())) {
             throw new AccessDeniedException();
         }
 
@@ -399,14 +408,14 @@ class VideosController extends AuthenticatedController {
         if ($metadata['statuscode'] == 200) {
 
             // Check if video isn't already present in current course.
-            $found = ExternalVideo::countBySQL("`external_id` = :video AND `course_id` = :course",
-                ['video' => $metadata['response']->video_id, 'course' => $this->course->id]);
+            $found = ExternalVideo::countBySQL("`external_id` = :video AND `range_id` = :range",
+                ['video' => $metadata['response']->video_id, 'range' => Context::getId()]);
 
             // Video is not linked in current course, create new database entry.
             if ($found == 0) {
                 $video = new ExternalVideo();
                 $video->type = 'vimeo';
-                $video->course_id = $this->course->id;
+                $video->range_id = Context::getId();
                 $video->user_id = $GLOBALS['user']->id;
                 $video->title = $metadata['response']->title ?: dgettext('videos', 'Ohne Titel');
                 $video->external_id = $metadata['response']->video_id;
@@ -467,7 +476,7 @@ class VideosController extends AuthenticatedController {
      */
     public function confirm_delete_action($id)
     {
-        if (!$GLOBALS['perm']->have_studip_perm('dozent', $this->course->id)) {
+        if (!$GLOBALS['perm']->have_studip_perm('dozent', Context::getId())) {
             throw new AccessDeniedException();
         }
 
@@ -480,7 +489,7 @@ class VideosController extends AuthenticatedController {
      * @param int $id
      */
     public function delete_action($id = 0) {
-        if (!$GLOBALS['perm']->have_studip_perm('dozent', $this->course->id)) {
+        if (!$GLOBALS['perm']->have_studip_perm('dozent', Context::getId())) {
             throw new AccessDeniedException();
         }
 

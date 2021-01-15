@@ -18,6 +18,7 @@
  *
  * @property int folder_id database column
  * @property int vimeo_id database column
+ * @property int range_id database column
  * @property string name database column
  * @property string mkdate database column
  * @property string chdate database column
@@ -36,15 +37,21 @@ class VimeoFolder extends SimpleORMap
     /**
      * Generates a folder name based on given semester and course.
      *
-     * @param Semester $semester
-     * @param Course $course
+     * @param Course|Institute $range
      * @return string
      */
-    public static function generateName($course)
+    public static function generateName($range)
     {
-        $coursename = ($course->veranstaltungsnummer ? $course->veranstaltungsnummer . ' ' : '') . $course->name;
-        // Max length for Vimeo titles is 128 characters.
-        return mb_substr('Stud.IP_' . $course->start_semester->name . '_' . $coursename, 0, 128);
+        if ($range instanceof Course) {
+            $name = ($range->veranstaltungsnummer ? $range->veranstaltungsnummer . ' ' : '') . $range->name;
+
+            // Max length for Vimeo titles is 128 characters.
+            return mb_substr('Stud.IP_' . $range->start_semester->name . '_' . $name, 0, 128);
+        } else {
+            // Max length for Vimeo titles is 128 characters.
+            return mb_substr('Stud.IP_' . $range->name, 0, 128);
+        }
+
     }
 
 }

@@ -20,7 +20,7 @@
  * @property string title database column
  * @property string password database column
  * @property int position database column
- * @property string course_id database column
+ * @property string range_id database column
  * @property string user_id database column
  * @property string visible_from database column
  * @property string visible_until database column
@@ -43,8 +43,13 @@ class ExternalVideo extends SimpleORMap
         ];
         $config['belongs_to']['course'] = [
             'class_name' => 'Course',
-            'foreign_key' => 'course_id',
+            'foreign_key' => 'range_id',
             'assoc_foreign_key' => 'seminar_id'
+        ];
+        $config['belongs_to']['institute'] = [
+            'class_name' => 'Institute',
+            'foreign_key' => 'range_id',
+            'assoc_foreign_key' => 'institut_id'
         ];
         $config['has_many']['dates'] = [
             'class_name' => 'ExternalVideoDate',
@@ -67,11 +72,11 @@ class ExternalVideo extends SimpleORMap
     /**
      * Finds all entries that belong to the given course and are visible right now.
      *
-     * @param string $course_id
+     * @param string $range_id
      */
-    public static function findByCourseAndVisibility($course_id)
+    public static function findByRangeAndVisibility($range_id)
     {
-        return self::findBySQL("`course_id` = :course
+        return self::findBySQL("`range_id` = :range
             AND (
                 `visible_from` <= NOW() AND `visible_until` IS NULL
                 OR `visible_from` IS NULL AND `visible_until` >= NOW()
@@ -79,7 +84,7 @@ class ExternalVideo extends SimpleORMap
                 OR `visible_from` IS NULL AND `visible_until` IS NULL
             )
             ORDER BY `position`, `title`",
-            ['course' => $course_id]);
+            ['range' => $range_id]);
     }
 
     /**
@@ -133,6 +138,12 @@ class ExternalVideo extends SimpleORMap
         $now = new DateTime();
 
         return $now >= $start && $now <= $end;
+    }
+
+    public function hasMoreReferences()
+    {
+        return count(self::findBySQL("`external_id` = :extid AND `video_id` != :id",
+                ['extid' => $this->external_id, 'id' => $this->id])) > 0;
     }
 
     /**
